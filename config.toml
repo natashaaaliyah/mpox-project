@@ -1,0 +1,7 @@
+[theme]
+base="light"
+primaryColor="#2E86C1"  # calm blue
+backgroundColor="#FFFFFF"
+secondaryBackgroundColor="#F4F6F7"
+textColor="#1B2631"
+font="sans serif"
