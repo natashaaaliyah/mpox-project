@@ -1,15 +1,19 @@
 import streamlit as st
 import numpy as np
 import cv2
+import tensorflow as tf
 from tensorflow.keras.models import load_model
 import joblib
+from datetime import datetime
+import random
+import string
 
 # ------------------ PAGE CONFIG ------------------
 st.set_page_config(
-    page_title="MpoxNet | AI Diagnostic System",
+    page_title="Mpox Health Checker | AI Diagnostic System",
     page_icon="🧬",
-    layout="centered",
-    initial_sidebar_state="collapsed"
+    layout="wide",
+    initial_sidebar_state="expanded"
 )
 
 # ------------------ GLOBAL STYLES ------------------
@@ -24,8 +28,76 @@ html, body, [data-testid="stAppViewContainer"] {
     font-family: 'Inter', sans-serif;
 }
 
+[data-testid="stAppViewContainer"] .main .block-container {
+    max-width: 880px;
+    padding-top: 2rem;
+}
+
 [data-testid="stHeader"] { background: transparent !important; }
-[data-testid="stSidebar"] { display: none; }
+
+/* ── Sidebar ────────────────────────────────────── */
+[data-testid="stSidebar"] {
+    background: #060B16 !important;
+    border-right: 1px solid #1E3A5F;
+}
+[data-testid="stSidebar"] * {
+    color: #CBD5E1 !important;
+}
+.sidebar-logo {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    letter-spacing: 2px;
+    color: #00C8B4 !important;
+    text-transform: uppercase;
+    padding: 4px 0 2px;
+}
+.sidebar-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: #F0F6FF !important;
+    margin: 0 0 18px;
+}
+.sidebar-section {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: #00C8B4 !important;
+    text-transform: uppercase;
+    margin: 22px 0 10px;
+    border-top: 1px solid #1E3A5F;
+    padding-top: 16px;
+}
+.sidebar-section:first-of-type { border-top: none; padding-top: 0; }
+.stat-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 0;
+    font-size: 12px;
+}
+.stat-row .stat-label { color: #7A9CC0 !important; }
+.stat-row .stat-value {
+    font-family: 'JetBrains Mono', monospace;
+    color: #E2E8F0 !important;
+    font-weight: 600;
+}
+.stat-value.good  { color: #34D399 !important; }
+.stat-value.live  { color: #00C8B4 !important; }
+.sidebar-p {
+    font-size: 12px;
+    line-height: 1.6;
+    color: #94A3B8 !important;
+}
+.sidebar-disclaimer {
+    background: #0D1B2E;
+    border: 1px solid #1E3A5F;
+    border-radius: 8px;
+    padding: 12px 14px;
+    font-size: 11px;
+    line-height: 1.6;
+    color: #7A9CC0 !important;
+    margin-top: 8px;
+}
 
 /* ── Top banner / hero ──────────────────────────── */
 .hero-banner {
@@ -117,6 +189,86 @@ html, body, [data-testid="stAppViewContainer"] {
 [data-testid="stFileUploader"] label {
     color: #7A9CC0 !important;
     font-size: 14px !important;
+}
+
+/* ── Camera input ───────────────────────────────── */
+[data-testid="stCameraInput"] {
+    background: #0D1B2E !important;
+    border: 2px dashed #1E3A5F !important;
+    border-radius: 12px !important;
+    padding: 16px !important;
+}
+[data-testid="stCameraInput"] label {
+    color: #7A9CC0 !important;
+    font-size: 14px !important;
+}
+[data-testid="stCameraInput"] button {
+    background: linear-gradient(135deg, #00C8B4, #0891B2) !important;
+    color: #0A0F1E !important;
+    font-weight: 700 !important;
+    border: none !important;
+    border-radius: 8px !important;
+}
+
+/* ── Tabs (Upload / Camera) ─────────────────────── */
+[data-testid="stTabs"] [data-baseweb="tab-list"] {
+    gap: 6px;
+    background: #0D1B2E;
+    border: 1px solid #1E3A5F;
+    border-radius: 10px;
+    padding: 4px;
+}
+[data-testid="stTabs"] [data-baseweb="tab"] {
+    color: #7A9CC0 !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    border-radius: 8px !important;
+    padding: 8px 16px !important;
+}
+[data-testid="stTabs"] [aria-selected="true"] {
+    background: linear-gradient(135deg, #00C8B4, #0891B2) !important;
+    color: #0A0F1E !important;
+}
+[data-testid="stTabs"] [data-testid="stMarkdownContainer"] p { margin: 0; }
+
+/* ── Scan metadata bar ──────────────────────────── */
+.scan-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    background: #0D1B2E;
+    border: 1px solid #1E3A5F;
+    border-radius: 10px;
+    padding: 10px 18px;
+    margin-top: 18px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: #7A9CC0;
+}
+.scan-live {
+    color: #34D399;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    font-weight: 600;
+}
+.scan-live-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: #34D399;
+    box-shadow: 0 0 0 0 rgba(52,211,153,0.7);
+    animation: pulse-dot 1.8s infinite;
+    display: inline-block;
+}
+@keyframes pulse-dot {
+    0%   { box-shadow: 0 0 0 0 rgba(52,211,153,0.5); }
+    70%  { box-shadow: 0 0 0 6px rgba(52,211,153,0); }
+    100% { box-shadow: 0 0 0 0 rgba(52,211,153,0); }
 }
 
 /* ── Result card ────────────────────────────────── */
@@ -244,6 +396,14 @@ html, body, [data-testid="stAppViewContainer"] {
     background: linear-gradient(135deg, #111208, #181A08);
     border: 1.5px solid #FBBF2460;
 }
+.final-card.rejected {
+    background: linear-gradient(135deg, #150B1F, #1A0F26);
+    border: 1.5px solid #A78BFA60;
+}
+.final-card.review {
+    background: linear-gradient(135deg, #1A1408, #201808);
+    border: 1.5px solid #FB923C60;
+}
 .final-card .verdict {
     font-size: 26px;
     font-weight: 700;
@@ -252,6 +412,8 @@ html, body, [data-testid="stAppViewContainer"] {
 .final-card .verdict.positive { color: #F87171; }
 .final-card .verdict.negative { color: #34D399; }
 .final-card .verdict.inconclusive { color: #FBBF24; }
+.final-card .verdict.rejected { color: #A78BFA; }
+.final-card .verdict.review { color: #FB923C; }
 .final-card .verdict-sub {
     font-size: 13px;
     color: #94A3B8;
@@ -323,25 +485,129 @@ def load_models():
 
 vgg_model, xgb_model = load_models()
 
-classes = ["Chickenpox", "Cowpox", "Hand-Foot-Mouth", "Healthy", "Measles", "Mpox"]
+# Order MUST match training: {'Chickenpox':0,'Cowpox':1,'HFMD':2,'Healthy':3,'Measles':4,'Monkeypox':5}
+classes = ["Chickenpox", "Cowpox", "HFMD", "Healthy", "Measles", "Monkeypox"]
 
-# Minimum confidence to trust a prediction — below this = inconclusive
-CONFIDENCE_THRESHOLD = 0.70
+# Minimum confidence to trust a prediction — below this = inconclusive.
+# Lowered from 0.70 → 0.40: with 76% overall accuracy across 6 visually-similar
+# classes, many CORRECT predictions sit in the 40-65% range. The skin-tone
+# and review checks now handle "irrelevant image" cases, so this threshold's
+# job is just to catch genuinely flat/uncertain predictions (~near 1/6 = 16.7%).
+CONFIDENCE_THRESHOLD = 0.40
+
+# Minimum fraction of skin-tone pixels for an image to be considered
+# a plausible skin photo — filters out charts, documents, screenshots, etc.
+SKIN_PIXEL_THRESHOLD = 0.05
+
+# A skin-lesion close-up usually fills MUCH more of the frame with skin tone
+# than something that just happens to contain orange/red/brown pixels
+# (e.g. retina scans, wood, food). Below this, treat high-confidence
+# results with suspicion.
+SKIN_PIXEL_STRONG_THRESHOLD = 0.20
+
+# If confidence is this high AND skin coverage is only "borderline"
+# (between SKIN_PIXEL_THRESHOLD and SKIN_PIXEL_STRONG_THRESHOLD),
+# flag the result for manual review instead of presenting it as fact —
+# real predictions on this model rarely hit such extreme confidence
+# on borderline-skin images.
+EXTREME_CONFIDENCE_THRESHOLD = 0.85
+
+
+def is_likely_skin_image(img, threshold=SKIN_PIXEL_THRESHOLD):
+    """Returns True if the image contains enough skin-tone pixels
+    to plausibly be a photo of skin (vs a chart, document, graph, etc.)"""
+    img_ycrcb = cv2.cvtColor(img, cv2.COLOR_BGR2YCrCb)
+
+    # Skin tone range in YCrCb — works reasonably across skin tones
+    lower = np.array([0, 135, 85], dtype=np.uint8)
+    upper = np.array([255, 180, 135], dtype=np.uint8)
+
+    mask = cv2.inRange(img_ycrcb, lower, upper)
+    skin_ratio = np.sum(mask > 0) / mask.size
+
+    return skin_ratio >= threshold, skin_ratio
+
+
+# ------------------ SIDEBAR ------------------
+with st.sidebar:
+    st.markdown("""
+
+    <div class="sidebar-title">SYSTEM OVERVIEW</div>
+
+    <div class="sidebar-section">Common Symptoms</div>
+    <div class="stat-row">
+        <span class="stat-label">✓</span>
+        <span class="stat-value">Skin Rash</span>
+    </div>
+
+    <div class="stat-row">
+        <span class="stat-label">✓</span>
+        <span class="stat-value">Fever</span>
+    </div>
+
+    <div class="stat-row">
+        <span class="stat-label">✓</span>
+        <span class="stat-value">Body Aches</span>
+    </div>
+
+    <div class="stat-row">
+        <span class="stat-label">✓</span>
+        <span class="stat-value">Swollen Glands</span>
+    </div>
+
+    <div class="sidebar-section">How to Use The System</div>
+    <div class="stat-row">
+        <span class="stat-label">Step 1</span>
+        <span class="stat-value">Upload Photo</span>
+    </div>
+    <div class="stat-row">
+        <span class="stat-label">Step 2</span>
+        <span class="stat-value">Answer Questions</span>
+    </div>
+    <div class="stat-row">
+        <span class="stat-label">Step 3</span>
+        <span class="stat-value">View Results</span>
+    </div>
+
+    <div class="sidebar-section">Seek Medical Care If</div>
+
+    <p class="sidebar-p">
+    • Rash is spreading rapidly<br>
+    • You have persistent fever<br>
+    • You have swollen glands<br>
+    • Symptoms are worsening
+    </p>
+
+    <div class="sidebar-section">About</div>
+    <p class="sidebar-p">
+        Mpox Health Checker fuses CNN-based image classification with a clinical
+        symptom questionnaire to support differential diagnosis of
+        Mpox against visually similar conditions (Chickenpox, Cowpox,
+        HFMD, Measles).
+    </p>
+    <div class="sidebar-disclaimer">
+        Your Health, Our Priority!!!.
+    </div>
+    """, unsafe_allow_html=True)
 
 
 # ------------------ HERO ------------------
 st.markdown("""
 <div class="hero-banner">
-    <div class="hero-eyebrow">🧬 Multimodal AI Diagnostic Platform</div>
-    <h1 class="hero-title">Mpox<span>Net</span> Detection System</h1>
+    <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:12px;">
+        <div class="hero-eyebrow">🧬 Multimodal AI Diagnostic Platform</div>
+        <div class="scan-live"><span class="scan-live-dot"></span>SYSTEM ONLINE</div>
+    </div>
+    <h1 class="hero-title">Mpox<span> Health Checker</span></h1>
     <p class="hero-sub">
-        CNN image classification fused with XGBoost symptom analysis
-        for high-confidence differential diagnosis
+        Upload a photo of the affected skin area and answer a few simple
+        questions. The system will help identify possible signs of Mpox
+        and provide guidance on the next steps.
     </p>
     <div class="badge-row">
-        <span class="badge badge-teal">VGG16 · Image Model</span>
-        <span class="badge badge-blue">XGBoost · Symptom Model</span>
-        <span class="badge badge-green">Multimodal Fusion</span>
+        <span class="badge badge-teal"> Photo Analysis</span>
+        <span class="badge badge-blue"> Symptom Check</span>
+        <span class="badge badge-green">Health Guidance</span>
     </div>
 </div>
 """, unsafe_allow_html=True)
@@ -357,8 +623,8 @@ st.markdown("""
     </div>
     <div class="pipeline-step">
         <div class="step-num">STEP 02</div>
-        <div class="step-name">CNN Screening</div>
-        <div class="step-desc">VGG16 classification</div>
+        <div class="step-name">Photo Analysis</div>
+        <div class="step-desc">Analyze the Photo</div>
     </div>
     <div class="pipeline-step">
         <div class="step-num">STEP 03</div>
@@ -367,75 +633,154 @@ st.markdown("""
     </div>
     <div class="pipeline-step">
         <div class="step-num">STEP 04</div>
-        <div class="step-name">Final Verdict</div>
-        <div class="step-desc">Fused diagnosis</div>
+        <div class="step-name">Get Results</div>
+        <div class="step-desc">View Guidance</div>
     </div>
 </div>
 <hr class="styled-divider">
 """, unsafe_allow_html=True)
 
 
-# ------------------ UPLOAD ------------------
-st.markdown('<div class="section-label">STEP 01 — Upload Skin Image</div>', unsafe_allow_html=True)
-uploaded_file = st.file_uploader(
-    "Drag & drop or click to browse — JPG or PNG accepted",
-    type=["jpg", "png"],
-    label_visibility="visible"
-)
+# ------------------ UPLOAD / CAPTURE ------------------
+st.markdown('<div class="section-label">STEP 01 — Provide Skin Image</div>', unsafe_allow_html=True)
+
+tab_upload, tab_camera = st.tabs(["  Upload Image", "📷  Take Photo"])
+
+with tab_upload:
+    uploaded_file = st.file_uploader(
+        "Upload a clear image of affected skin area",
+        type=["jpg", "png"],
+        label_visibility="visible"
+    )
+
+with tab_camera:
+    camera_file = st.camera_input(
+        "Use your device camera to capture the affected skin area",
+        label_visibility="visible"
+    )
+
+# Use whichever input was provided (upload takes priority if both exist)
+image_file = uploaded_file if uploaded_file is not None else camera_file
 
 
 # ------------------ MAIN LOGIC ------------------
-if uploaded_file is not None:
+if image_file is not None:
 
-    file_bytes = np.asarray(bytearray(uploaded_file.read()), dtype=np.uint8)
+    file_bytes = np.asarray(bytearray(image_file.read()), dtype=np.uint8)
     img = cv2.imdecode(file_bytes, 1)
     img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+
+    # Generate a scan ID for this session/image — adds a "real record" feel
+    if "scan_id" not in st.session_state or st.session_state.get("last_file_id") != image_file.file_id:
+        st.session_state["scan_id"] = "SCAN-" + "".join(random.choices(string.digits, k=6))
+        st.session_state["last_file_id"] = image_file.file_id
+
+    source_label = "Camera Capture" if image_file is camera_file else "File Upload"
 
     col_img, col_gap = st.columns([1, 0.05])
     with col_img:
         st.image(img_rgb, caption="Uploaded image", use_container_width=True)
 
+    st.markdown(f"""
+    <div class="scan-meta">
+        <span>🆔 {st.session_state['scan_id']}</span>
+        <span>📅 {datetime.now().strftime('%d %b %Y, %H:%M')}</span>
+        <span>📥 Source: {source_label}</span>
+        <span class="scan-live"><span class="scan-live-dot"></span>ANALYZING</span>
+    </div>
+    """, unsafe_allow_html=True)
+
+    # ---------- SKIN-IMAGE PRE-CHECK ----------
+    skin_ok, skin_ratio = is_likely_skin_image(img)
+
+    if not skin_ok:
+        st.markdown(f"""
+        <div class="final-card rejected">
+            <div class="verdict rejected">📷 Photo Not Suitable</div>
+            <div class="verdict-sub">
+                The current image does not provide enough detail
+                for reliable analysis.
+            
+            
+        </div>
+        """, unsafe_allow_html=True)
+        st.stop()
+
     # Preprocess & predict
-    img_resized = cv2.resize(img, (224, 224)) / 255.0
-    img_input  = np.expand_dims(img_resized, axis=0)
+    img_resized = cv2.resize(img, (224, 224))
+    img_array   = np.expand_dims(img_resized, axis=0)
+    img_input   = tf.keras.applications.vgg16.preprocess_input(img_array)  # ✅ matches training
 
     with st.spinner("Running CNN analysis…"):
-        prediction     = vgg_model.predict(img_input)
-        confidence     = float(np.max(prediction[0]))
-        predicted_idx  = int(np.argmax(prediction[0]))
-        predicted_class = classes[predicted_idx]
+        prediction = vgg_model.predict(img_input)
+        probs      = prediction[0]
 
-    is_mpox         = predicted_class == "Mpox"
+        predicted_idx   = int(np.argmax(probs))
+        predicted_class = classes[predicted_idx]
+        confidence      = float(probs[predicted_idx])
+
+        # Safety-net: still flag for symptom check if Mpox crosses 35%,
+        # even when it isn't the model's top guess — but don't force
+        # the DISPLAYED result to "Monkeypox" when it isn't.
+        mpox_idx  = classes.index("Monkeypox")
+        mpox_prob = float(probs[mpox_idx])
+
+    is_mpox         = (predicted_class == "Monkeypox") or (mpox_prob >= 0.35)
     is_inconclusive = confidence < CONFIDENCE_THRESHOLD
+
+    # Borderline skin coverage + suspiciously high confidence = likely
+    # a non-skin image (retina scans, food, wood grain, etc.) that happens
+    # to fall in the skin-tone color range. Flag for manual review.
+    is_review = (
+        not is_inconclusive
+        and skin_ratio < SKIN_PIXEL_STRONG_THRESHOLD
+        and confidence >= EXTREME_CONFIDENCE_THRESHOLD
+    )
 
     bar_class    = "danger" if is_mpox else "safe"
     text_class   = "mpox"  if is_mpox else "safe"
     fill_class   = "confidence-fill-danger" if is_mpox else "confidence-fill-safe"
     card_variant = "danger" if is_mpox else "safe"
 
-    st.markdown(f"""
-    <div class="result-card {card_variant}">
-        <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:16px;">
-            <div>
-                <div class="result-label">CNN Classification Result</div>
-                <p class="result-class {text_class}">{predicted_class if not is_inconclusive else "—"}</p>
+    if not is_review:
+        st.markdown(f"""
+        <div class="result-card {card_variant}">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:16px;">
+                <div>
+                    <div class="result-label">Photo Analysis Result</div>
+                    <p class="result-class {text_class}">{predicted_class if not is_inconclusive else "—"}</p>
+                </div>
+                <div style="text-align:right;">
+                    <div class="result-label">Result Reliability</div>
+                    <div class="confidence-text {bar_class}">{confidence*100:.1f}%</div>
+                </div>
             </div>
-            <div style="text-align:right;">
-                <div class="result-label">Model Confidence</div>
-                <div class="confidence-text {bar_class}">{confidence*100:.1f}%</div>
+            <div class="confidence-bar-bg">
+                <div class="confidence-bar-fill {fill_class}" style="width:{confidence*100:.1f}%"></div>
             </div>
         </div>
-        <div class="confidence-bar-bg">
-            <div class="confidence-bar-fill {fill_class}" style="width:{confidence*100:.1f}%"></div>
+        """, unsafe_allow_html=True)
+
+    # ---------- BORDERLINE SKIN + EXTREME CONFIDENCE → review ----------
+    if is_review:
+        st.markdown(f"""
+        <div class="final-card review">
+            <div class="verdict review">🔎 Unusual Result — Review Recommended</div>
+            <div class="verdict-sub">
+                Only {skin_ratio*100:.1f}% of this image is skin-toned —
+                lower than expected for a typical lesion close-up.
+                This pattern often indicates a non-skin image (e.g. another type of medical scan,
+                or an object with skin-like colors). Please verify this is a clear photo of a
+                skin lesion, or upload a different image.
+            </div>
         </div>
-    </div>
-    """, unsafe_allow_html=True)
+        """, unsafe_allow_html=True)
 
     # ---------- LOW CONFIDENCE → inconclusive ----------
-    if is_inconclusive:
+    elif is_inconclusive:
         st.markdown(f"""
         <div class="final-card inconclusive">
-            <div class="verdict inconclusive">⚡ Inconclusive Result</div>
+            <div class="verdict inconclusive">⚠ Unable to Determine</div>
             <div class="verdict-sub">
                 Model confidence is {confidence*100:.1f}%, below the required threshold of {CONFIDENCE_THRESHOLD*100:.0f}%.
                 The uploaded image may not be a valid skin lesion, or the quality is insufficient for reliable diagnosis.
@@ -457,7 +802,7 @@ if uploaded_file is not None:
     else:
         st.markdown("""
         <div class="symptoms-header">
-            <p>⚠️ Mpox Suspected — Symptom Verification Required</p>
+            <p>⚠️ Possible Signs of Mpox Detected</p>
             <small>The image model has flagged this as a potential Mpox case.
             Please complete the clinical symptom questionnaire below to confirm the diagnosis.</small>
         </div>
@@ -479,7 +824,7 @@ if uploaded_file is not None:
             muscle_pain    = st.selectbox("Muscle Aches & Pain",      ["No", "Yes"])
             swollen_lymph  = st.selectbox("Swollen Lymph Nodes",      ["No", "Yes"])
 
-        if st.button("🔍 Run Symptom Analysis"):
+        if st.button("🔍 Check Symptoms"):
             features = np.array([[
                 1 if rectal_pain     == "Yes" else 0,
                 1 if sore_throat     == "Yes" else 0,
@@ -502,17 +847,26 @@ if uploaded_file is not None:
             if is_positive:
                 st.markdown(f"""
                 <div class="final-card positive">
-                    <div class="verdict positive">⚠ Mpox CONFIRMED</div>
+                    <div class="verdict positive">⚠ High Risk Of Mpox</div>
                     <div class="verdict-sub">
                         Both image analysis and symptom profile indicate Mpox infection.
                         Immediate clinical referral is recommended.
                     </div>
                 </div>
                 """, unsafe_allow_html=True)
+                st.info("""
+            What should you do next?
+
+            • Avoid close physical contact if you have a rash
+            • Wash your hands regularly
+            • Cover affected skin areas
+            • Visit a health facility if symptoms worsen
+            • Follow Ministry of Health guidance
+            """)
             else:
                 st.markdown(f"""
                 <div class="final-card negative">
-                    <div class="verdict negative">✓ Mpox Not Confirmed</div>
+                    <div class="verdict negative">✓ Low Risk Of Mpox</div>
                     <div class="verdict-sub">
                         Symptom profile does not support Mpox diagnosis despite image flag.
                         Clinical follow-up is advised.
@@ -525,7 +879,7 @@ if uploaded_file is not None:
 st.markdown("""
 <hr class="styled-divider">
 <div class="footer">
-    <p>MpoxNet · Multimodal AI Diagnostic System · Final Year Project · COCIS, Makerere University</p>
+    <p>Mpox Health Checker · Multimodal AI Diagnostic System · Makerere University</p>
     <p style="margin-top:4px;">For research and academic evaluation only — not a substitute for clinical diagnosis</p>
 </div>
 """, unsafe_allow_html=True)
