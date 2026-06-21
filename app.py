@@ -7,6 +7,9 @@ import joblib
 from datetime import datetime
 import random
 import string
+import os
+import uuid
+import pandas as pd
 
 # ------------------ PAGE CONFIG ------------------
 st.set_page_config(
@@ -15,6 +18,101 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="expanded"
 )
+
+# ------------------ RECORDS / "DATABASE" ------------------
+# Simple CSV-based storage: one row per diagnosis (healthy or not).
+# Images are saved alongside the CSV so they can be reviewed later.
+APP_DIR     = os.path.dirname(os.path.abspath(__file__))
+RECORDS_DIR = os.path.join(APP_DIR, "records")
+IMAGES_DIR  = os.path.join(RECORDS_DIR, "images")
+CSV_PATH    = os.path.join(RECORDS_DIR, "diagnosis_log.csv")
+
+CSV_COLUMNS = [
+    "record_id",        # unique ID for this record
+    "scan_id",           # the SCAN-###### shown in the UI
+    "timestamp",         # when the record was created
+    "source",            # File Upload / Camera Capture
+    "image_path",        # path to the saved image (relative to app folder)
+    "skin_ratio",        # fraction of skin-tone pixels detected
+    "image_verdict",     # the CNN's outcome label, e.g. "Healthy", "Monkeypox", "Inconclusive", "Review"
+    "predicted_class",   # raw top predicted class from the CNN (may be blank if inconclusive)
+    "confidence",        # CNN confidence (0-1) for the predicted class
+    "mpox_probability",  # CNN's raw probability specifically for the Monkeypox class
+    "symptoms_checked",  # True/False — whether the symptom form was submitted
+    "symptom_answers",   # summary string of the symptom answers, blank if not checked
+    "final_verdict",     # the overall final outcome shown to the user
+]
+
+
+def _ensure_storage():
+    """Create the records folder structure and CSV header if they don't exist yet."""
+    os.makedirs(IMAGES_DIR, exist_ok=True)
+    if not os.path.exists(CSV_PATH):
+        pd.DataFrame(columns=CSV_COLUMNS).to_csv(CSV_PATH, index=False)
+
+
+def save_diagnosis_record(
+    scan_id,
+    source,
+    img_rgb,
+    skin_ratio,
+    image_verdict,
+    predicted_class=None,
+    confidence=None,
+    mpox_probability=None,
+    symptoms_checked=False,
+    symptom_answers=None,
+    final_verdict=None,
+):
+    """Append one diagnosis record to the CSV and save the associated image.
+    Called for EVERY outcome — healthy and unhealthy alike — so the log
+    reflects the full population of people who used the checker."""
+    _ensure_storage()
+
+    record_id = str(uuid.uuid4())[:8]
+    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+    # Save the image as a JPEG next to the CSV, named with the record_id
+    # so it's easy to trace a row back to its photo.
+    image_filename = f"{record_id}.jpg"
+    image_path_abs = os.path.join(IMAGES_DIR, image_filename)
+    image_path_rel = os.path.join("records", "images", image_filename)
+    try:
+        img_bgr_to_save = cv2.cvtColor(img_rgb, cv2.COLOR_RGB2BGR)
+        cv2.imwrite(image_path_abs, img_bgr_to_save)
+    except Exception:
+        image_path_rel = ""  # if saving the image fails, still log the rest of the record
+
+    new_row = {
+        "record_id": record_id,
+        "scan_id": scan_id,
+        "timestamp": timestamp,
+        "source": source,
+        "image_path": image_path_rel,
+        "skin_ratio": round(float(skin_ratio), 4) if skin_ratio is not None else "",
+        "image_verdict": image_verdict,
+        "predicted_class": predicted_class or "",
+        "confidence": round(float(confidence), 4) if confidence is not None else "",
+        "mpox_probability": round(float(mpox_probability), 4) if mpox_probability is not None else "",
+        "symptoms_checked": symptoms_checked,
+        "symptom_answers": symptom_answers or "",
+        "final_verdict": final_verdict or image_verdict,
+    }
+
+    df = pd.read_csv(CSV_PATH)
+    df = pd.concat([df, pd.DataFrame([new_row])], ignore_index=True)
+    df.to_csv(CSV_PATH, index=False)
+    return record_id
+
+
+def load_records():
+    """Load all saved diagnosis records, newest first."""
+    _ensure_storage()
+    df = pd.read_csv(CSV_PATH)
+    if not df.empty and "timestamp" in df.columns:
+        df = df.sort_values("timestamp", ascending=False)
+    return df
+
 
 # ------------------ GLOBAL STYLES ------------------
 st.markdown("""
@@ -644,7 +742,7 @@ st.markdown("""
 # ------------------ UPLOAD / CAPTURE ------------------
 st.markdown('<div class="section-label">STEP 01 — Provide Skin Image</div>', unsafe_allow_html=True)
 
-tab_upload, tab_camera = st.tabs(["  Upload Image", "📷  Take Photo"])
+tab_upload, tab_camera, tab_history = st.tabs(["  Upload Image", "📷  Take Photo", "🗂️  History"])
 
 with tab_upload:
     uploaded_file = st.file_uploader(
@@ -658,6 +756,62 @@ with tab_camera:
         "Use your device camera to capture the affected skin area",
         label_visibility="visible"
     )
+
+with tab_history:
+    st.markdown('<div class="section-label">Past Diagnosis Records</div>', unsafe_allow_html=True)
+
+    records_df = load_records()
+
+    if records_df.empty:
+        st.info("No records yet. Records are saved automatically each time a photo is analyzed.")
+    else:
+        col_f1, col_f2 = st.columns(2)
+        with col_f1:
+            verdict_options = ["All"] + sorted(records_df["final_verdict"].dropna().unique().tolist())
+            verdict_filter = st.selectbox("Filter by result", verdict_options)
+        with col_f2:
+            source_options = ["All"] + sorted(records_df["source"].dropna().unique().tolist())
+            source_filter = st.selectbox("Filter by source", source_options)
+
+        filtered_df = records_df.copy()
+        if verdict_filter != "All":
+            filtered_df = filtered_df[filtered_df["final_verdict"] == verdict_filter]
+        if source_filter != "All":
+            filtered_df = filtered_df[filtered_df["source"] == source_filter]
+
+        st.caption(f"Showing {len(filtered_df)} of {len(records_df)} total record(s)")
+
+        st.dataframe(
+            filtered_df[[
+                "timestamp", "scan_id", "source", "image_verdict",
+                "confidence", "symptoms_checked", "final_verdict"
+            ]],
+            use_container_width=True,
+            hide_index=True,
+        )
+
+        with st.expander("🖼️ View record photos"):
+            n_thumbs = min(len(filtered_df), 12)
+            if n_thumbs == 0:
+                st.caption("No photos to show for this filter.")
+            else:
+                thumb_cols = st.columns(4)
+                for i in range(n_thumbs):
+                    row = filtered_df.iloc[i]
+                    img_p = os.path.join(APP_DIR, row["image_path"]) if isinstance(row["image_path"], str) and row["image_path"] else None
+                    with thumb_cols[i % 4]:
+                        if img_p and os.path.exists(img_p):
+                            st.image(img_p, caption=f"{row['scan_id']} · {row['final_verdict']}", use_container_width=True)
+                        else:
+                            st.caption(f"{row['scan_id']} (image unavailable)")
+
+        csv_bytes = filtered_df.to_csv(index=False).encode("utf-8")
+        st.download_button(
+            "⬇️ Download records as CSV",
+            data=csv_bytes,
+            file_name="diagnosis_log.csv",
+            mime="text/csv",
+        )
 
 # Use whichever input was provided (upload takes priority if both exist)
 image_file = uploaded_file if uploaded_file is not None else camera_file
@@ -776,6 +930,15 @@ if image_file is not None:
         </div>
         """, unsafe_allow_html=True)
 
+        if st.session_state.get("saved_record_for") != st.session_state["scan_id"]:
+            save_diagnosis_record(
+                scan_id=st.session_state["scan_id"], source=source_label, img_rgb=img_rgb,
+                skin_ratio=skin_ratio, image_verdict="Review Recommended",
+                predicted_class=predicted_class, confidence=confidence, mpox_probability=mpox_prob,
+                final_verdict="Review Recommended",
+            )
+            st.session_state["saved_record_for"] = st.session_state["scan_id"]
+
     # ---------- LOW CONFIDENCE → inconclusive ----------
     elif is_inconclusive:
         st.markdown(f"""
@@ -789,6 +952,15 @@ if image_file is not None:
         </div>
         """, unsafe_allow_html=True)
 
+        if st.session_state.get("saved_record_for") != st.session_state["scan_id"]:
+            save_diagnosis_record(
+                scan_id=st.session_state["scan_id"], source=source_label, img_rgb=img_rgb,
+                skin_ratio=skin_ratio, image_verdict="Inconclusive",
+                predicted_class=predicted_class, confidence=confidence, mpox_probability=mpox_prob,
+                final_verdict="Inconclusive",
+            )
+            st.session_state["saved_record_for"] = st.session_state["scan_id"]
+
     # ---------- NOT MPOX → done ----------
     elif not is_mpox:
         st.markdown(f"""
@@ -797,6 +969,15 @@ if image_file is not None:
             <div class="verdict-sub">Image analysis does not indicate Mpox infection. No further screening required.</div>
         </div>
         """, unsafe_allow_html=True)
+
+        if st.session_state.get("saved_record_for") != st.session_state["scan_id"]:
+            save_diagnosis_record(
+                scan_id=st.session_state["scan_id"], source=source_label, img_rgb=img_rgb,
+                skin_ratio=skin_ratio, image_verdict=predicted_class,
+                predicted_class=predicted_class, confidence=confidence, mpox_probability=mpox_prob,
+                final_verdict=predicted_class,
+            )
+            st.session_state["saved_record_for"] = st.session_state["scan_id"]
 
     # ---------- MPOX SUSPECTED ----------
     else:
@@ -807,6 +988,15 @@ if image_file is not None:
             Please complete the clinical symptom questionnaire below to confirm the diagnosis.</small>
         </div>
         """, unsafe_allow_html=True)
+
+        if st.session_state.get("saved_record_for") != st.session_state["scan_id"]:
+            save_diagnosis_record(
+                scan_id=st.session_state["scan_id"], source=source_label, img_rgb=img_rgb,
+                skin_ratio=skin_ratio, image_verdict="Monkeypox (suspected)",
+                predicted_class=predicted_class, confidence=confidence, mpox_probability=mpox_prob,
+                final_verdict="Monkeypox (suspected — awaiting symptom check)",
+            )
+            st.session_state["saved_record_for"] = st.session_state["scan_id"]
 
         st.markdown('<div class="section-label">STEP 03 — Clinical Symptom Profile</div>', unsafe_allow_html=True)
 
@@ -863,6 +1053,19 @@ if image_file is not None:
             • Visit a health facility if symptoms worsen
             • Follow Ministry of Health guidance
             """)
+
+                symptom_summary = (
+                    f"rectal_pain={rectal_pain}; sore_throat={sore_throat}; penile_oedema={penile_oedema}; "
+                    f"oral_lesions={oral_lesions}; solitary_lesion={solitary_lesion}; swollen_tonsils={swollen_tonsils}; "
+                    f"hiv_infection={hiv_infection}; std={std}; muscle_pain={muscle_pain}; swollen_lymph={swollen_lymph}"
+                )
+                save_diagnosis_record(
+                    scan_id=st.session_state["scan_id"], source=source_label, img_rgb=img_rgb,
+                    skin_ratio=skin_ratio, image_verdict="Monkeypox (suspected)",
+                    predicted_class=predicted_class, confidence=confidence, mpox_probability=mpox_prob,
+                    symptoms_checked=True, symptom_answers=symptom_summary,
+                    final_verdict="High Risk Of Mpox",
+                )
             else:
                 st.markdown(f"""
                 <div class="final-card negative">
@@ -873,6 +1076,19 @@ if image_file is not None:
                     </div>
                 </div>
                 """, unsafe_allow_html=True)
+
+                symptom_summary = (
+                    f"rectal_pain={rectal_pain}; sore_throat={sore_throat}; penile_oedema={penile_oedema}; "
+                    f"oral_lesions={oral_lesions}; solitary_lesion={solitary_lesion}; swollen_tonsils={swollen_tonsils}; "
+                    f"hiv_infection={hiv_infection}; std={std}; muscle_pain={muscle_pain}; swollen_lymph={swollen_lymph}"
+                )
+                save_diagnosis_record(
+                    scan_id=st.session_state["scan_id"], source=source_label, img_rgb=img_rgb,
+                    skin_ratio=skin_ratio, image_verdict="Monkeypox (suspected)",
+                    predicted_class=predicted_class, confidence=confidence, mpox_probability=mpox_prob,
+                    symptoms_checked=True, symptom_answers=symptom_summary,
+                    final_verdict="Low Risk Of Mpox",
+                )
 
 
 # ------------------ FOOTER ------------------
