@@ -825,11 +825,21 @@ if image_file is not None:
     img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 
     # Generate a scan ID for this session/image — adds a "real record" feel
+    # Also store the SOURCE here, tied to the file_id, so it survives Streamlit
+    # reruns (the `image_file is camera_file` identity check breaks on reruns
+    # because Streamlit recreates widget objects each time the script runs).
     if "scan_id" not in st.session_state or st.session_state.get("last_file_id") != image_file.file_id:
         st.session_state["scan_id"] = "SCAN-" + "".join(random.choices(string.digits, k=6))
         st.session_state["last_file_id"] = image_file.file_id
+        # Determine source now, at the moment we first see this file_id,
+        # when widget identity checks are still valid.
+        st.session_state["source_label"] = (
+            "Camera Capture" if camera_file is not None and image_file.file_id == camera_file.file_id
+            else "File Upload"
+        )
+        st.session_state["saved_record_for"] = None  # reset save-guard for new image
 
-    source_label = "Camera Capture" if image_file is camera_file else "File Upload"
+    source_label = st.session_state["source_label"]
 
     col_img, col_gap = st.columns([1, 0.05])
     with col_img:
@@ -896,6 +906,34 @@ if image_file is not None:
     fill_class   = "confidence-fill-danger" if is_mpox else "confidence-fill-safe"
     card_variant = "danger" if is_mpox else "safe"
 
+    # Build the per-class probability breakdown HTML.
+    # Colours: Monkeypox → red, Healthy → green, all others → amber.
+    CLASS_COLORS = {
+        "Monkeypox":  "#F87171",   # red
+        "Healthy":    "#34D399",   # green
+        "Chickenpox": "#FBBF24",   # amber
+        "Cowpox":     "#FBBF24",
+        "HFMD":       "#FBBF24",
+        "Measles":    "#FBBF24",
+    }
+    breakdown_rows = ""
+    for cls, prob in sorted(zip(classes, probs), key=lambda x: x[1], reverse=True):
+        pct   = prob * 100
+        color = CLASS_COLORS.get(cls, "#FBBF24")
+        bold  = "font-weight:700;" if cls == predicted_class else ""
+        breakdown_rows += f"""
+        <div style="margin-bottom:10px;">
+            <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+                <span style="font-size:12px; color:#CBD5E1; {bold}">{cls}</span>
+                <span style="font-family:'JetBrains Mono',monospace; font-size:12px;
+                             color:{color}; {bold}">{pct:.1f}%</span>
+            </div>
+            <div style="background:#1E3A5F; border-radius:4px; height:6px; overflow:hidden;">
+                <div style="width:{pct:.1f}%; height:100%; border-radius:4px;
+                            background:{color}; transition:width 0.5s ease;"></div>
+            </div>
+        </div>"""
+
     if not is_review:
         st.markdown(f"""
         <div class="result-card {card_variant}">
@@ -905,13 +943,15 @@ if image_file is not None:
                     <p class="result-class {text_class}">{predicted_class if not is_inconclusive else "—"}</p>
                 </div>
                 <div style="text-align:right;">
-                    <div class="result-label">Result Reliability</div>
+                    <div class="result-label">Top Confidence</div>
                     <div class="confidence-text {bar_class}">{confidence*100:.1f}%</div>
                 </div>
             </div>
-            <div class="confidence-bar-bg">
+            <div class="confidence-bar-bg" style="margin-bottom:20px;">
                 <div class="confidence-bar-fill {fill_class}" style="width:{confidence*100:.1f}%"></div>
             </div>
+            <div class="result-label" style="margin-bottom:12px;">PROBABILITY BREAKDOWN — ALL CONDITIONS</div>
+            {breakdown_rows}
         </div>
         """, unsafe_allow_html=True)
 
