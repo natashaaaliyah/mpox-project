@@ -733,8 +733,128 @@ html, body, [data-testid="stAppViewContainer"] {
     display: inline-block;
 }
 
-/* ── Divider ─────────────────────────────────────── */
-.styled-divider {
+/* ── Rotating info banner ───────────────────────── */
+.banner-carousel {
+    position: relative;
+    height: 56px;
+    overflow: hidden;
+    border-radius: 12px;
+    margin-bottom: 20px;
+}
+.banner-slide {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    padding: 0 20px;
+    gap: 12px;
+    border-radius: 12px;
+    opacity: 0;
+    animation: banner-cycle 20s infinite;
+    border: 1px solid var(--border);
+}
+.banner-slide:nth-child(1) { animation-delay: 0s;   background: linear-gradient(135deg,#071C38,#0A1E3A); border-color:#3B82F630; }
+.banner-slide:nth-child(2) { animation-delay: 5s;   background: linear-gradient(135deg,#071C1A,#0A2220); border-color:#10B98130; }
+.banner-slide:nth-child(3) { animation-delay: 10s;  background: linear-gradient(135deg,#1A1008,#201408); border-color:#F59E0B30; }
+.banner-slide:nth-child(4) { animation-delay: 15s;  background: linear-gradient(135deg,#150A20,#1C1028); border-color:#8B5CF630; }
+@keyframes banner-cycle {
+    0%        { opacity:0; transform:translateY(8px);  }
+    3%, 22%   { opacity:1; transform:translateY(0);    }
+    25%, 100% { opacity:0; transform:translateY(-8px); }
+}
+.banner-icon { font-size: 22px; flex-shrink: 0; }
+.banner-text { flex: 1; }
+.banner-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 2px;
+}
+.banner-sub {
+    font-size: 11px;
+    color: var(--text-secondary);
+    line-height: 1.3;
+}
+.banner-tag {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    padding: 3px 8px;
+    border-radius: 6px;
+    letter-spacing: 1px;
+    flex-shrink: 0;
+}
+
+/* ── Footer redesign ────────────────────────────── */
+.site-footer {
+    margin-top: 60px;
+    border-top: 1px solid var(--border);
+    padding-top: 36px;
+    padding-bottom: 20px;
+}
+.footer-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr;
+    gap: 32px;
+    margin-bottom: 28px;
+}
+.footer-brand .footer-logo {
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--teal);
+    letter-spacing: -0.5px;
+    margin-bottom: 8px;
+}
+.footer-brand p {
+    font-size: 12px;
+    color: var(--text-secondary);
+    line-height: 1.7;
+    margin: 0;
+    max-width: 260px;
+}
+.footer-col-title {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    letter-spacing: 2px;
+    color: var(--teal);
+    text-transform: uppercase;
+    margin-bottom: 12px;
+}
+.footer-link {
+    display: block;
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-bottom: 7px;
+    text-decoration: none;
+    transition: color 0.2s;
+}
+.footer-link:hover { color: var(--teal); }
+.footer-bottom {
+    border-top: 1px solid var(--border);
+    padding-top: 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+.footer-bottom p {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin: 0;
+    font-family: var(--font-mono);
+}
+.footer-badge-row { display: flex; gap: 8px; flex-wrap: wrap; }
+.footer-badge {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    padding: 3px 10px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    letter-spacing: 0.5px;
+}
+
     border: none;
     border-top: 1px solid var(--border);
     margin: 32px 0;
@@ -939,6 +1059,45 @@ st.markdown("""
         <div class="step-desc">Decision-level fusion</div>
     </div>
 </div>
+
+<div style="height:20px;"></div>
+
+<!-- ── Rotating info banners ── -->
+<div class="banner-carousel">
+    <div class="banner-slide">
+        <span class="banner-icon">🧬</span>
+        <div class="banner-text">
+            <div class="banner-title">VGG16 Deep Learning Engine</div>
+            <div class="banner-sub">Pretrained on ImageNet · Fine-tuned on MSLD v2.0 · 537 clinical images · 6 classes</div>
+        </div>
+        <span class="banner-tag" style="background:#3B82F610;color:#3B82F6;border:1px solid #3B82F630;">CNN MODEL</span>
+    </div>
+    <div class="banner-slide">
+        <span class="banner-icon">🛡️</span>
+        <div class="banner-text">
+            <div class="banner-title">Early Detection Saves Lives</div>
+            <div class="banner-sub">Mpox is treatable when caught early — this tool supports faster triage and clinical referral</div>
+        </div>
+        <span class="banner-tag" style="background:#10B98110;color:#10B981;border:1px solid #10B98130;">HEALTH TIP</span>
+    </div>
+    <div class="banner-slide">
+        <span class="banner-icon">⚠️</span>
+        <div class="banner-text">
+            <div class="banner-title">For Best Results</div>
+            <div class="banner-sub">Use a clear, well-lit close-up photo of the affected skin area — avoid blurry or distant shots</div>
+        </div>
+        <span class="banner-tag" style="background:#F59E0B10;color:#F59E0B;border:1px solid #F59E0B30;">USAGE TIP</span>
+    </div>
+    <div class="banner-slide">
+        <span class="banner-icon">📊</span>
+        <div class="banner-text">
+            <div class="banner-title">Multimodal Fusion Architecture</div>
+            <div class="banner-sub">Image CNN + XGBoost symptom classifier combined via decision-level fusion for higher accuracy</div>
+        </div>
+        <span class="banner-tag" style="background:#8B5CF610;color:#8B5CF6;border:1px solid #8B5CF630;">ARCHITECTURE</span>
+    </div>
+</div>
+
 <hr class="styled-divider">
 """, unsafe_allow_html=True)
 
@@ -1074,8 +1233,22 @@ if image_file is not None:
         """, unsafe_allow_html=True)
         st.stop()
 
-    # Preprocess & predict
-    img_resized = cv2.resize(img, (224, 224))
+    # ---------- PREPROCESS & PREDICT ----------
+    # For camera captures: apply CLAHE (Contrast Limited Adaptive Histogram
+    # Equalization) on the L-channel in LAB colour space to normalise uneven
+    # webcam lighting before feeding into the model. Uploaded files are already
+    # well-lit curated images so we skip this step for them to avoid altering
+    # images that are already close to training-set conditions.
+    img_for_model = img.copy()
+    if source_label == "Camera Capture":
+        lab        = cv2.cvtColor(img_for_model, cv2.COLOR_BGR2LAB)
+        l, a, b    = cv2.split(lab)
+        clahe      = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
+        l_eq       = clahe.apply(l)
+        lab_eq     = cv2.merge([l_eq, a, b])
+        img_for_model = cv2.cvtColor(lab_eq, cv2.COLOR_LAB2BGR)
+
+    img_resized = cv2.resize(img_for_model, (224, 224))
     img_array   = np.expand_dims(img_resized, axis=0)
     img_input   = tf.keras.applications.vgg16.preprocess_input(img_array)  # ✅ matches training
 
@@ -1337,12 +1510,38 @@ if image_file is not None:
 
 # ------------------ FOOTER ------------------
 st.markdown("""
-<hr class="styled-divider">
-<div class="footer">
-    <div class="footer-logo">MpoxAI</div>
-    <p>Mpox Health Checker · Multimodal AI Diagnostic System · Makerere University</p>
-    <p style="margin-top:6px; font-family:'Inter',sans-serif; letter-spacing:0;">
-        For research and academic evaluation only — not a substitute for clinical diagnosis
-    </p>
+<div class="site-footer">
+    <div class="footer-grid">
+        <div class="footer-brand">
+            <div class="footer-logo">MpoxAI</div>
+            <p>A multimodal AI diagnostic platform combining VGG16 deep learning with XGBoost clinical symptom classification. Built for academic research at Makerere University.</p>
+        </div>
+        <div>
+            <div class="footer-col-title">Conditions Screened</div>
+            <span class="footer-link">🔴 Monkeypox (Mpox)</span>
+            <span class="footer-link">🟠 Chickenpox</span>
+            <span class="footer-link">🟡 Cowpox</span>
+            <span class="footer-link">🟢 HFMD</span>
+            <span class="footer-link">🔵 Measles</span>
+            <span class="footer-link">✅ Healthy Skin</span>
+        </div>
+        <div>
+            <div class="footer-col-title">Tech Stack</div>
+            <span class="footer-link">TensorFlow 2.18 · Keras</span>
+            <span class="footer-link">VGG16 · ImageNet</span>
+            <span class="footer-link">XGBoost Classifier</span>
+            <span class="footer-link">OpenCV · NumPy</span>
+            <span class="footer-link">Streamlit 1.56</span>
+            <span class="footer-link">MSLD v2.0 Dataset</span>
+        </div>
+    </div>
+    <div class="footer-bottom">
+        <p>© 2026 MpoxAI · Makerere University · Group 18 · Supervisor: Mr. Jonathan Kizito</p>
+        <div class="footer-badge-row">
+            <span class="footer-badge">RESEARCH ONLY</span>
+            <span class="footer-badge">NOT CLINICAL ADVICE</span>
+            <span class="footer-badge">v1.0.0</span>
+        </div>
+    </div>
 </div>
 """, unsafe_allow_html=True)
