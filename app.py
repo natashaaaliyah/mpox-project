@@ -1021,7 +1021,46 @@ st.markdown("""
         <span class="badge badge-purple">6-Class Detection</span>
     </div>
 </div>
+""", unsafe_allow_html=True)
 
+st.markdown("""
+<div class="banner-carousel">
+    <div class="banner-slide" style="background:rgba(0,200,180,0.07); border-color:#00C8B430;">
+        <span class="banner-icon">🧬</span>
+        <div class="banner-text">
+            <div class="banner-title">VGG16 Deep Learning Engine</div>
+            <div class="banner-sub">Pretrained on ImageNet · Fine-tuned on MSLD v2.0 · 537 clinical images · 6 classes</div>
+        </div>
+        <span class="banner-tag" style="background:#3B82F610;color:#3B82F6;border:1px solid #3B82F630;">CNN MODEL</span>
+    </div>
+    <div class="banner-slide" style="background:rgba(16,185,129,0.07); border-color:#10B98130;">
+        <span class="banner-icon">🛡️</span>
+        <div class="banner-text">
+            <div class="banner-title">Early Detection Saves Lives</div>
+            <div class="banner-sub">Mpox is treatable when caught early — this tool supports faster triage and clinical referral</div>
+        </div>
+        <span class="banner-tag" style="background:#10B98110;color:#10B981;border:1px solid #10B98130;">HEALTH TIP</span>
+    </div>
+    <div class="banner-slide" style="background:rgba(245,158,11,0.07); border-color:#F59E0B30;">
+        <span class="banner-icon">⚠️</span>
+        <div class="banner-text">
+            <div class="banner-title">For Best Results</div>
+            <div class="banner-sub">Use a clear, well-lit close-up photo of the affected skin area — avoid blurry or distant shots</div>
+        </div>
+        <span class="banner-tag" style="background:#F59E0B10;color:#F59E0B;border:1px solid #F59E0B30;">USAGE TIP</span>
+    </div>
+    <div class="banner-slide" style="background:rgba(139,92,246,0.07); border-color:#8B5CF630;">
+        <span class="banner-icon">📊</span>
+        <div class="banner-text">
+            <div class="banner-title">Multimodal Fusion Architecture</div>
+            <div class="banner-sub">Image CNN + XGBoost symptom classifier combined via decision-level fusion for higher accuracy</div>
+        </div>
+        <span class="banner-tag" style="background:#8B5CF610;color:#8B5CF6;border:1px solid #8B5CF630;">ARCHITECTURE</span>
+    </div>
+</div>
+""", unsafe_allow_html=True)
+
+st.markdown("""
 <div class="model-panel">
     <div class="model-tag"><span class="dot" style="background:#00C8B4;"></span>VGG16 · ImageNet pretrained</div>
     <div class="model-tag"><span class="dot" style="background:#3B82F6;"></span>XGBoost · 10 clinical features</div>
@@ -1057,44 +1096,6 @@ st.markdown("""
         <span class="step-icon">📊</span>
         <div class="step-name">Fused Result</div>
         <div class="step-desc">Decision-level fusion</div>
-    </div>
-</div>
-
-<div style="height:20px;"></div>
-
-<!-- ── Rotating info banners ── -->
-<div class="banner-carousel">
-    <div class="banner-slide">
-        <span class="banner-icon">🧬</span>
-        <div class="banner-text">
-            <div class="banner-title">VGG16 Deep Learning Engine</div>
-            <div class="banner-sub">Pretrained on ImageNet · Fine-tuned on MSLD v2.0 · 537 clinical images · 6 classes</div>
-        </div>
-        <span class="banner-tag" style="background:#3B82F610;color:#3B82F6;border:1px solid #3B82F630;">CNN MODEL</span>
-    </div>
-    <div class="banner-slide">
-        <span class="banner-icon">🛡️</span>
-        <div class="banner-text">
-            <div class="banner-title">Early Detection Saves Lives</div>
-            <div class="banner-sub">Mpox is treatable when caught early — this tool supports faster triage and clinical referral</div>
-        </div>
-        <span class="banner-tag" style="background:#10B98110;color:#10B981;border:1px solid #10B98130;">HEALTH TIP</span>
-    </div>
-    <div class="banner-slide">
-        <span class="banner-icon">⚠️</span>
-        <div class="banner-text">
-            <div class="banner-title">For Best Results</div>
-            <div class="banner-sub">Use a clear, well-lit close-up photo of the affected skin area — avoid blurry or distant shots</div>
-        </div>
-        <span class="banner-tag" style="background:#F59E0B10;color:#F59E0B;border:1px solid #F59E0B30;">USAGE TIP</span>
-    </div>
-    <div class="banner-slide">
-        <span class="banner-icon">📊</span>
-        <div class="banner-text">
-            <div class="banner-title">Multimodal Fusion Architecture</div>
-            <div class="banner-sub">Image CNN + XGBoost symptom classifier combined via decision-level fusion for higher accuracy</div>
-        </div>
-        <span class="banner-tag" style="background:#8B5CF610;color:#8B5CF6;border:1px solid #8B5CF630;">ARCHITECTURE</span>
     </div>
 </div>
 
@@ -1536,7 +1537,7 @@ st.markdown("""
         </div>
     </div>
     <div class="footer-bottom">
-        <p>© 2026 MpoxAI · Makerere University · Group 18 · Supervisor: Mr. Jonathan Kizito</p>
+        <p>© 2026 MpoxAI · Makerere University · For Research & Academic Evaluation Only</p>
         <div class="footer-badge-row">
             <span class="footer-badge">RESEARCH ONLY</span>
             <span class="footer-badge">NOT CLINICAL ADVICE</span>
