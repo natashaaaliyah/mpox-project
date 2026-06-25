@@ -117,215 +117,315 @@ def load_records():
 # ------------------ GLOBAL STYLES ------------------
 st.markdown("""
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+/* ── CSS variables ───────────────────────────────── */
+:root {
+    --bg-base:      #050A14;
+    --bg-panel:     #0A1628;
+    --bg-card:      #0D1E35;
+    --bg-hover:     #112240;
+    --border:       #1A3A5C;
+    --border-glow:  #00C8B440;
+    --teal:         #00C8B4;
+    --teal-dim:     #00C8B420;
+    --blue:         #3B82F6;
+    --blue-dim:     #3B82F615;
+    --green:        #10B981;
+    --green-dim:    #10B98115;
+    --red:          #EF4444;
+    --red-dim:      #EF444415;
+    --amber:        #F59E0B;
+    --amber-dim:    #F59E0B15;
+    --purple:       #8B5CF6;
+    --text-primary: #F0F6FF;
+    --text-secondary: #94A3B8;
+    --text-muted:   #475569;
+    --font-mono:    'JetBrains Mono', monospace;
+}
 
 /* ── Base reset ─────────────────────────────────── */
 html, body, [data-testid="stAppViewContainer"] {
-    background-color: #0A0F1E !important;
-    color: #E2E8F0 !important;
+    background-color: var(--bg-base) !important;
+    color: var(--text-primary) !important;
     font-family: 'Inter', sans-serif;
 }
-
 [data-testid="stAppViewContainer"] .main .block-container {
-    max-width: 880px;
-    padding-top: 2rem;
+    max-width: 920px;
+    padding-top: 1.5rem;
+    padding-bottom: 3rem;
 }
-
-[data-testid="stHeader"] { background: transparent !important; }
+[data-testid="stHeader"]           { background: transparent !important; }
+[data-testid="stDecoration"]       { display: none !important; }
+[data-testid="stToolbar"]          { display: none !important; }
 
 /* ── Sidebar ────────────────────────────────────── */
 [data-testid="stSidebar"] {
-    background: #060B16 !important;
-    border-right: 1px solid #1E3A5F;
+    background: linear-gradient(180deg, #06101E 0%, #050A14 100%) !important;
+    border-right: 1px solid var(--border);
 }
-[data-testid="stSidebar"] * {
-    color: #CBD5E1 !important;
-}
+[data-testid="stSidebar"] * { color: #94A3B8 !important; }
+
 .sidebar-logo {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 13px;
-    letter-spacing: 2px;
-    color: #00C8B4 !important;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 3px;
+    color: var(--teal) !important;
     text-transform: uppercase;
-    padding: 4px 0 2px;
+    margin-bottom: 4px;
 }
 .sidebar-title {
-    font-size: 20px;
-    font-weight: 700;
-    color: #F0F6FF !important;
-    margin: 0 0 18px;
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--text-primary) !important;
+    margin: 0 0 20px;
+    letter-spacing: -0.3px;
 }
 .sidebar-section {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 10px;
-    letter-spacing: 2px;
-    color: #00C8B4 !important;
+    font-family: var(--font-mono);
+    font-size: 9px;
+    letter-spacing: 2.5px;
+    color: var(--teal) !important;
     text-transform: uppercase;
-    margin: 22px 0 10px;
-    border-top: 1px solid #1E3A5F;
-    padding-top: 16px;
+    margin: 24px 0 12px;
+    border-top: 1px solid var(--border);
+    padding-top: 18px;
 }
 .sidebar-section:first-of-type { border-top: none; padding-top: 0; }
+
 .stat-row {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 6px 0;
+    padding: 5px 0;
     font-size: 12px;
+    border-bottom: 1px solid #0F2035;
 }
-.stat-row .stat-label { color: #7A9CC0 !important; }
+.stat-row:last-child { border-bottom: none; }
+.stat-row .stat-label { color: var(--text-muted) !important; font-size: 11px; }
 .stat-row .stat-value {
-    font-family: 'JetBrains Mono', monospace;
-    color: #E2E8F0 !important;
+    font-family: var(--font-mono);
+    color: var(--text-primary) !important;
+    font-size: 11px;
     font-weight: 600;
 }
-.stat-value.good  { color: #34D399 !important; }
-.stat-value.live  { color: #00C8B4 !important; }
+.stat-value.good  { color: var(--green)  !important; }
+.stat-value.live  { color: var(--teal)   !important; }
+
 .sidebar-p {
-    font-size: 12px;
-    line-height: 1.6;
-    color: #94A3B8 !important;
+    font-size: 11px;
+    line-height: 1.7;
+    color: var(--text-secondary) !important;
 }
 .sidebar-disclaimer {
-    background: #0D1B2E;
-    border: 1px solid #1E3A5F;
+    background: linear-gradient(135deg, #0A1628, #081422);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--teal);
     border-radius: 8px;
     padding: 12px 14px;
     font-size: 11px;
     line-height: 1.6;
-    color: #7A9CC0 !important;
-    margin-top: 8px;
+    color: var(--text-secondary) !important;
+    margin-top: 12px;
 }
 
-/* ── Top banner / hero ──────────────────────────── */
+/* ── Metric chips (model info row) ──────────────── */
+.metric-chip-row {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin: 14px 0 0;
+}
+.metric-chip {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 12px;
+    flex: 1;
+    min-width: 70px;
+    text-align: center;
+}
+.metric-chip .mc-val {
+    font-family: var(--font-mono);
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--teal);
+    display: block;
+    line-height: 1;
+}
+.metric-chip .mc-lbl {
+    font-size: 9px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-top: 4px;
+    display: block;
+}
+
+/* ── Hero banner ────────────────────────────────── */
 .hero-banner {
-    background: linear-gradient(135deg, #0D1B3E 0%, #0A2240 50%, #061226 100%);
-    border: 1px solid #1E3A5F;
-    border-radius: 16px;
-    padding: 36px 40px 28px;
-    margin-bottom: 32px;
+    background: linear-gradient(135deg, #071428 0%, #0A1E3A 40%, #050D1E 100%);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 40px 44px 32px;
+    margin-bottom: 28px;
     position: relative;
     overflow: hidden;
 }
 .hero-banner::before {
     content: '';
     position: absolute;
-    top: -60px; right: -60px;
-    width: 220px; height: 220px;
-    background: radial-gradient(circle, rgba(0,200,180,0.12) 0%, transparent 70%);
+    top: -80px; right: -80px;
+    width: 300px; height: 300px;
+    background: radial-gradient(circle, rgba(0,200,180,0.10) 0%, transparent 65%);
     border-radius: 50%;
+    pointer-events: none;
 }
 .hero-banner::after {
     content: '';
     position: absolute;
-    bottom: -40px; left: 40px;
-    width: 140px; height: 140px;
-    background: radial-gradient(circle, rgba(30,100,200,0.10) 0%, transparent 70%);
+    bottom: -60px; left: 60px;
+    width: 200px; height: 200px;
+    background: radial-gradient(circle, rgba(59,130,246,0.08) 0%, transparent 65%);
     border-radius: 50%;
+    pointer-events: none;
+}
+/* animated top border glow */
+.hero-banner-glow {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--teal), var(--blue), transparent);
+    animation: glow-sweep 4s ease-in-out infinite;
+}
+@keyframes glow-sweep {
+    0%, 100% { opacity: 0.3; }
+    50%       { opacity: 1.0; }
 }
 .hero-eyebrow {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 11px;
-    letter-spacing: 3px;
-    color: #00C8B4;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 3.5px;
+    color: var(--teal);
     text-transform: uppercase;
-    margin-bottom: 10px;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.hero-eyebrow::before {
+    content: '';
+    width: 20px; height: 1px;
+    background: var(--teal);
+    display: inline-block;
 }
 .hero-title {
-    font-size: 32px;
-    font-weight: 700;
-    color: #F0F6FF;
-    line-height: 1.2;
-    margin: 0 0 8px;
+    font-size: 38px;
+    font-weight: 800;
+    color: var(--text-primary);
+    line-height: 1.15;
+    margin: 0 0 10px;
+    letter-spacing: -0.5px;
 }
-.hero-title span { color: #00C8B4; }
+.hero-title span { color: var(--teal); }
 .hero-sub {
     font-size: 14px;
-    color: #7A9CC0;
+    color: var(--text-secondary);
     font-weight: 400;
     margin: 0;
+    max-width: 520px;
+    line-height: 1.6;
 }
 .badge-row {
     display: flex;
-    gap: 10px;
-    margin-top: 20px;
+    gap: 8px;
+    margin-top: 22px;
     flex-wrap: wrap;
 }
 .badge {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 10px;
-    letter-spacing: 1px;
-    padding: 4px 12px;
+    font-family: var(--font-mono);
+    font-size: 9px;
+    letter-spacing: 1.2px;
+    padding: 5px 14px;
     border-radius: 20px;
     border: 1px solid;
+    text-transform: uppercase;
 }
-.badge-teal  { color: #00C8B4; border-color: #00C8B430; background: #00C8B408; }
-.badge-blue  { color: #60A5FA; border-color: #60A5FA30; background: #60A5FA08; }
-.badge-green { color: #34D399; border-color: #34D39930; background: #34D39908; }
+.badge-teal   { color: var(--teal);  border-color: #00C8B440; background: #00C8B410; }
+.badge-blue   { color: var(--blue);  border-color: #3B82F640; background: #3B82F610; }
+.badge-green  { color: var(--green); border-color: #10B98140; background: #10B98110; }
+.badge-purple { color: var(--purple);border-color: #8B5CF640; background: #8B5CF610; }
 
 /* ── Section labels ─────────────────────────────── */
 .section-label {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 10px;
-    letter-spacing: 2.5px;
+    font-family: var(--font-mono);
+    font-size: 9px;
+    letter-spacing: 3px;
     text-transform: uppercase;
-    color: #00C8B4;
-    margin-bottom: 10px;
+    color: var(--teal);
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, var(--border), transparent);
 }
 
-/* ── Upload zone ────────────────────────────────── */
+/* ── Upload / Camera zones ──────────────────────── */
 [data-testid="stFileUploader"] {
-    background: #0D1B2E !important;
-    border: 2px dashed #1E3A5F !important;
-    border-radius: 12px !important;
-    padding: 24px !important;
-    transition: border-color 0.2s;
+    background: var(--bg-card) !important;
+    border: 1.5px dashed var(--border) !important;
+    border-radius: 14px !important;
+    padding: 28px !important;
+    transition: all 0.25s ease !important;
 }
 [data-testid="stFileUploader"]:hover {
-    border-color: #00C8B460 !important;
+    border-color: var(--teal) !important;
+    background: var(--bg-hover) !important;
+    box-shadow: 0 0 20px var(--teal-dim) !important;
 }
-[data-testid="stFileUploader"] label {
-    color: #7A9CC0 !important;
-    font-size: 14px !important;
-}
+[data-testid="stFileUploader"] label { color: var(--text-secondary) !important; }
 
-/* ── Camera input ───────────────────────────────── */
 [data-testid="stCameraInput"] {
-    background: #0D1B2E !important;
-    border: 2px dashed #1E3A5F !important;
-    border-radius: 12px !important;
-    padding: 16px !important;
+    background: var(--bg-card) !important;
+    border: 1.5px dashed var(--border) !important;
+    border-radius: 14px !important;
+    padding: 18px !important;
 }
-[data-testid="stCameraInput"] label {
-    color: #7A9CC0 !important;
-    font-size: 14px !important;
-}
+[data-testid="stCameraInput"] label { color: var(--text-secondary) !important; }
 [data-testid="stCameraInput"] button {
-    background: linear-gradient(135deg, #00C8B4, #0891B2) !important;
-    color: #0A0F1E !important;
+    background: linear-gradient(135deg, var(--teal), #0891B2) !important;
+    color: #050A14 !important;
     font-weight: 700 !important;
     border: none !important;
     border-radius: 8px !important;
 }
 
-/* ── Tabs (Upload / Camera) ─────────────────────── */
+/* ── Tabs ───────────────────────────────────────── */
 [data-testid="stTabs"] [data-baseweb="tab-list"] {
-    gap: 6px;
-    background: #0D1B2E;
-    border: 1px solid #1E3A5F;
-    border-radius: 10px;
-    padding: 4px;
+    gap: 4px;
+    background: var(--bg-panel);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 5px;
 }
 [data-testid="stTabs"] [data-baseweb="tab"] {
-    color: #7A9CC0 !important;
-    font-size: 13px !important;
+    color: var(--text-secondary) !important;
+    font-size: 12px !important;
     font-weight: 600 !important;
-    border-radius: 8px !important;
-    padding: 8px 16px !important;
+    border-radius: 9px !important;
+    padding: 8px 18px !important;
+    transition: all 0.2s !important;
+    letter-spacing: 0.3px !important;
 }
 [data-testid="stTabs"] [aria-selected="true"] {
-    background: linear-gradient(135deg, #00C8B4, #0891B2) !important;
-    color: #0A0F1E !important;
+    background: linear-gradient(135deg, var(--teal), #0891B2) !important;
+    color: #050A14 !important;
+    box-shadow: 0 2px 12px rgba(0,200,180,0.30) !important;
 }
 [data-testid="stTabs"] [data-testid="stMarkdownContainer"] p { margin: 0; }
 
@@ -335,22 +435,27 @@ html, body, [data-testid="stAppViewContainer"] {
     justify-content: space-between;
     align-items: center;
     flex-wrap: wrap;
-    gap: 8px;
-    background: #0D1B2E;
-    border: 1px solid #1E3A5F;
-    border-radius: 10px;
-    padding: 10px 18px;
-    margin-top: 18px;
-    font-family: 'JetBrains Mono', monospace;
+    gap: 10px;
+    background: var(--bg-panel);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 12px 20px;
+    margin-top: 16px;
+    font-family: var(--font-mono);
     font-size: 11px;
-    color: #7A9CC0;
+    color: var(--text-secondary);
 }
-.scan-live {
-    color: #34D399;
+.scan-meta-item {
     display: flex;
     align-items: center;
     gap: 6px;
-    font-family: 'JetBrains Mono', monospace;
+}
+.scan-live {
+    color: var(--green);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--font-mono);
     font-size: 10px;
     letter-spacing: 2px;
     font-weight: 600;
@@ -358,52 +463,64 @@ html, body, [data-testid="stAppViewContainer"] {
 .scan-live-dot {
     width: 7px; height: 7px;
     border-radius: 50%;
-    background: #34D399;
-    box-shadow: 0 0 0 0 rgba(52,211,153,0.7);
+    background: var(--green);
     animation: pulse-dot 1.8s infinite;
     display: inline-block;
 }
 @keyframes pulse-dot {
-    0%   { box-shadow: 0 0 0 0 rgba(52,211,153,0.5); }
-    70%  { box-shadow: 0 0 0 6px rgba(52,211,153,0); }
-    100% { box-shadow: 0 0 0 0 rgba(52,211,153,0); }
+    0%   { box-shadow: 0 0 0 0   rgba(16,185,129,0.6); }
+    70%  { box-shadow: 0 0 0 7px rgba(16,185,129,0);   }
+    100% { box-shadow: 0 0 0 0   rgba(16,185,129,0);   }
 }
 
 /* ── Result card ────────────────────────────────── */
 .result-card {
-    background: #0D1B2E;
-    border: 1px solid #1E3A5F;
-    border-radius: 14px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
     padding: 28px 32px;
     margin-top: 24px;
+    position: relative;
+    overflow: hidden;
+}
+.result-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    border-radius: 16px 16px 0 0;
 }
 .result-card.danger {
-    border-color: #C0392B50;
-    background: #1A0A0A;
+    border-color: #EF444430;
+    background: linear-gradient(135deg, #120808, #180C0C);
 }
+.result-card.danger::before  { background: linear-gradient(90deg, var(--red), transparent); }
 .result-card.safe {
-    border-color: #00C8B440;
-    background: #081A18;
+    border-color: #10B98130;
+    background: linear-gradient(135deg, #081812, #0A1F16);
 }
+.result-card.safe::before    { background: linear-gradient(90deg, var(--green), transparent); }
+
 .result-label {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 10px;
-    letter-spacing: 2px;
-    color: #7A9CC0;
+    font-family: var(--font-mono);
+    font-size: 9px;
+    letter-spacing: 2.5px;
+    color: var(--text-muted);
     text-transform: uppercase;
     margin-bottom: 6px;
 }
 .result-class {
-    font-size: 28px;
-    font-weight: 700;
-    color: #F0F6FF;
+    font-size: 30px;
+    font-weight: 800;
+    color: var(--text-primary);
     margin: 0;
-    text-transform: capitalize;
+    letter-spacing: -0.5px;
 }
-.result-class.mpox { color: #F87171; }
-.result-class.safe { color: #34D399; }
+.result-class.mpox { color: var(--red); }
+.result-class.safe { color: var(--green); }
+
 .confidence-bar-bg {
-    background: #1E3A5F;
+    background: #0F2035;
     border-radius: 6px;
     height: 8px;
     margin-top: 16px;
@@ -412,163 +529,357 @@ html, body, [data-testid="stAppViewContainer"] {
 .confidence-bar-fill {
     height: 100%;
     border-radius: 6px;
-    transition: width 0.6s ease;
+    transition: width 0.8s cubic-bezier(0.4,0,0.2,1);
 }
-.confidence-fill-safe   { background: linear-gradient(90deg, #00C8B4, #34D399); }
-.confidence-fill-danger { background: linear-gradient(90deg, #F87171, #EF4444); }
+.confidence-fill-safe   { background: linear-gradient(90deg, #10B981, #34D399); }
+.confidence-fill-danger { background: linear-gradient(90deg, #EF4444, #F87171); }
 .confidence-text {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 22px;
-    font-weight: 600;
-    margin-top: 8px;
+    font-family: var(--font-mono);
+    font-size: 26px;
+    font-weight: 700;
+    margin-top: 4px;
+    line-height: 1;
 }
-.confidence-text.safe   { color: #34D399; }
-.confidence-text.danger { color: #F87171; }
+.confidence-text.safe   { color: var(--green); }
+.confidence-text.danger { color: var(--red);   }
 
 /* ── Symptom form ───────────────────────────────── */
 .symptoms-header {
-    background: #1A0A0A;
-    border: 1px solid #C0392B40;
+    background: linear-gradient(135deg, #150808, #1C0C0C);
+    border: 1px solid #EF444430;
+    border-left: 3px solid var(--red);
     border-radius: 12px;
     padding: 18px 24px;
     margin: 24px 0 20px;
 }
 .symptoms-header p {
     color: #F87171;
-    font-weight: 600;
+    font-weight: 700;
     font-size: 15px;
-    margin: 0;
+    margin: 0 0 4px;
 }
-.symptoms-header small {
-    color: #9CA3AF;
-    font-size: 12px;
-}
+.symptoms-header small { color: var(--text-secondary); font-size: 12px; }
 
 [data-testid="stSelectbox"] > div > div {
-    background: #0D1B2E !important;
-    border: 1px solid #1E3A5F !important;
+    background: var(--bg-card) !important;
+    border: 1px solid var(--border) !important;
     border-radius: 8px !important;
-    color: #E2E8F0 !important;
+    color: var(--text-primary) !important;
     font-size: 13px !important;
+    transition: border-color 0.2s !important;
+}
+[data-testid="stSelectbox"] > div > div:focus-within {
+    border-color: var(--teal) !important;
+    box-shadow: 0 0 0 3px var(--teal-dim) !important;
 }
 [data-testid="stSelectbox"] label {
-    color: #94A3B8 !important;
-    font-size: 12px !important;
-    font-weight: 500 !important;
+    color: var(--text-secondary) !important;
+    font-size: 11px !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.3px !important;
 }
 
-/* ── Analyze button ─────────────────────────────── */
+/* ── Buttons ────────────────────────────────────── */
 [data-testid="stButton"] > button {
-    background: linear-gradient(135deg, #00C8B4, #0891B2) !important;
-    color: #0A0F1E !important;
+    background: linear-gradient(135deg, var(--teal) 0%, #0891B2 100%) !important;
+    color: #050A14 !important;
     font-weight: 700 !important;
-    font-size: 14px !important;
-    letter-spacing: 0.5px !important;
+    font-size: 13px !important;
+    letter-spacing: 1px !important;
+    text-transform: uppercase !important;
     border: none !important;
     border-radius: 10px !important;
     padding: 14px 32px !important;
     width: 100% !important;
     margin-top: 12px !important;
-    transition: opacity 0.2s !important;
+    transition: all 0.2s ease !important;
+    box-shadow: 0 4px 16px rgba(0,200,180,0.25) !important;
 }
 [data-testid="stButton"] > button:hover {
-    opacity: 0.88 !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 6px 24px rgba(0,200,180,0.40) !important;
+}
+[data-testid="stButton"] > button:active {
+    transform: translateY(0) !important;
 }
 
 /* ── Final diagnosis card ────────────────────────── */
 .final-card {
-    border-radius: 14px;
-    padding: 28px 32px;
+    border-radius: 16px;
+    padding: 32px 36px;
     margin-top: 20px;
     text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+.final-card::after {
+    content: '';
+    position: absolute;
+    bottom: -40px; right: -40px;
+    width: 120px; height: 120px;
+    border-radius: 50%;
+    opacity: 0.06;
 }
 .final-card.positive {
-    background: linear-gradient(135deg, #1A0808, #200E0E);
-    border: 1.5px solid #F8717160;
+    background: linear-gradient(135deg, #150808 0%, #1C0E0E 100%);
+    border: 1.5px solid #EF444440;
 }
+.final-card.positive::after { background: var(--red); }
 .final-card.negative {
-    background: linear-gradient(135deg, #081A14, #0A1F18);
-    border: 1.5px solid #34D39960;
+    background: linear-gradient(135deg, #071812 0%, #0A1F18 100%);
+    border: 1.5px solid #10B98140;
 }
+.final-card.negative::after { background: var(--green); }
 .final-card.inconclusive {
-    background: linear-gradient(135deg, #111208, #181A08);
-    border: 1.5px solid #FBBF2460;
+    background: linear-gradient(135deg, #14110A 0%, #1C1810 100%);
+    border: 1.5px solid #F59E0B40;
 }
+.final-card.inconclusive::after { background: var(--amber); }
 .final-card.rejected {
-    background: linear-gradient(135deg, #150B1F, #1A0F26);
-    border: 1.5px solid #A78BFA60;
+    background: linear-gradient(135deg, #110C1C 0%, #180F28 100%);
+    border: 1.5px solid #8B5CF640;
 }
 .final-card.review {
-    background: linear-gradient(135deg, #1A1408, #201808);
-    border: 1.5px solid #FB923C60;
+    background: linear-gradient(135deg, #16120A 0%, #1E1810 100%);
+    border: 1.5px solid #FB923C40;
 }
 .final-card .verdict {
-    font-size: 26px;
-    font-weight: 700;
-    margin: 0 0 6px;
+    font-size: 28px;
+    font-weight: 800;
+    margin: 0 0 8px;
+    letter-spacing: -0.3px;
 }
-.final-card .verdict.positive { color: #F87171; }
-.final-card .verdict.negative { color: #34D399; }
-.final-card .verdict.inconclusive { color: #FBBF24; }
-.final-card .verdict.rejected { color: #A78BFA; }
-.final-card .verdict.review { color: #FB923C; }
+.final-card .verdict.positive    { color: #F87171; }
+.final-card .verdict.negative    { color: var(--green); }
+.final-card .verdict.inconclusive{ color: var(--amber); }
+.final-card .verdict.rejected    { color: var(--purple); }
+.final-card .verdict.review      { color: #FB923C; }
 .final-card .verdict-sub {
     font-size: 13px;
-    color: #94A3B8;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    max-width: 480px;
+    margin: 0 auto;
 }
 
-/* ── Pipeline info row ──────────────────────────── */
+/* ── Pipeline steps ─────────────────────────────── */
 .pipeline-row {
     display: flex;
-    gap: 12px;
-    margin: 28px 0 0;
+    gap: 10px;
+    margin: 24px 0 0;
     flex-wrap: wrap;
 }
 .pipeline-step {
     flex: 1;
-    min-width: 120px;
-    background: #0D1B2E;
-    border: 1px solid #1E3A5F;
-    border-radius: 10px;
-    padding: 14px 16px;
+    min-width: 110px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px 14px;
     text-align: center;
+    position: relative;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+.pipeline-step:hover {
+    border-color: var(--teal);
+    box-shadow: 0 0 16px var(--teal-dim);
 }
 .pipeline-step .step-num {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 10px;
-    color: #00C8B4;
-    letter-spacing: 1px;
+    font-family: var(--font-mono);
+    font-size: 9px;
+    color: var(--teal);
+    letter-spacing: 1.5px;
+    font-weight: 600;
+}
+.pipeline-step .step-icon {
+    font-size: 20px;
+    margin: 6px 0 4px;
+    display: block;
 }
 .pipeline-step .step-name {
     font-size: 12px;
-    font-weight: 600;
-    color: #CBD5E1;
-    margin-top: 4px;
+    font-weight: 700;
+    color: var(--text-primary);
 }
 .pipeline-step .step-desc {
     font-size: 10px;
-    color: #64748B;
+    color: var(--text-muted);
     margin-top: 2px;
 }
 
-/* ── Divider ────────────────────────────────────── */
-.styled-divider {
+/* ── Model info panel ───────────────────────────── */
+.model-panel {
+    display: flex;
+    gap: 10px;
+    margin: 0 0 24px;
+    flex-wrap: wrap;
+}
+.model-tag {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 6px 14px;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--text-secondary);
+    letter-spacing: 0.5px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.model-tag .dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+/* ── Rotating info banner ───────────────────────── */
+.banner-carousel {
+    position: relative;
+    height: 56px;
+    overflow: hidden;
+    border-radius: 12px;
+    margin-bottom: 20px;
+}
+.banner-slide {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    padding: 0 20px;
+    gap: 12px;
+    border-radius: 12px;
+    opacity: 0;
+    animation: banner-cycle 20s infinite;
+    border: 1px solid var(--border);
+}
+.banner-slide:nth-child(1) { animation-delay: 0s;   background: linear-gradient(135deg,#071C38,#0A1E3A); border-color:#3B82F630; }
+.banner-slide:nth-child(2) { animation-delay: 5s;   background: linear-gradient(135deg,#071C1A,#0A2220); border-color:#10B98130; }
+.banner-slide:nth-child(3) { animation-delay: 10s;  background: linear-gradient(135deg,#1A1008,#201408); border-color:#F59E0B30; }
+.banner-slide:nth-child(4) { animation-delay: 15s;  background: linear-gradient(135deg,#150A20,#1C1028); border-color:#8B5CF630; }
+@keyframes banner-cycle {
+    0%        { opacity:0; transform:translateY(8px);  }
+    3%, 22%   { opacity:1; transform:translateY(0);    }
+    25%, 100% { opacity:0; transform:translateY(-8px); }
+}
+.banner-icon { font-size: 22px; flex-shrink: 0; }
+.banner-text { flex: 1; }
+.banner-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 2px;
+}
+.banner-sub {
+    font-size: 11px;
+    color: var(--text-secondary);
+    line-height: 1.3;
+}
+.banner-tag {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    padding: 3px 8px;
+    border-radius: 6px;
+    letter-spacing: 1px;
+    flex-shrink: 0;
+}
+
+/* ── Footer redesign ────────────────────────────── */
+.site-footer {
+    margin-top: 60px;
+    border-top: 1px solid var(--border);
+    padding-top: 36px;
+    padding-bottom: 20px;
+}
+.footer-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr;
+    gap: 32px;
+    margin-bottom: 28px;
+}
+.footer-brand .footer-logo {
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--teal);
+    letter-spacing: -0.5px;
+    margin-bottom: 8px;
+}
+.footer-brand p {
+    font-size: 12px;
+    color: var(--text-secondary);
+    line-height: 1.7;
+    margin: 0;
+    max-width: 260px;
+}
+.footer-col-title {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    letter-spacing: 2px;
+    color: var(--teal);
+    text-transform: uppercase;
+    margin-bottom: 12px;
+}
+.footer-link {
+    display: block;
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-bottom: 7px;
+    text-decoration: none;
+    transition: color 0.2s;
+}
+.footer-link:hover { color: var(--teal); }
+.footer-bottom {
+    border-top: 1px solid var(--border);
+    padding-top: 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+.footer-bottom p {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin: 0;
+    font-family: var(--font-mono);
+}
+.footer-badge-row { display: flex; gap: 8px; flex-wrap: wrap; }
+.footer-badge {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    padding: 3px 10px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    letter-spacing: 0.5px;
+}
+
     border: none;
-    border-top: 1px solid #1E3A5F;
-    margin: 28px 0;
+    border-top: 1px solid var(--border);
+    margin: 32px 0;
 }
 
 /* ── Footer ─────────────────────────────────────── */
 .footer {
     text-align: center;
-    margin-top: 48px;
-    padding: 24px 0 16px;
-    border-top: 1px solid #1E3A5F;
+    margin-top: 56px;
+    padding: 24px 0 20px;
+    border-top: 1px solid var(--border);
 }
 .footer p {
     font-size: 11px;
-    color: #334155;
+    color: var(--text-muted);
     margin: 0;
+    font-family: var(--font-mono);
+    letter-spacing: 0.5px;
+}
+.footer-logo {
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--teal);
+    letter-spacing: -0.3px;
+    margin-bottom: 6px;
 }
 </style>
 """, unsafe_allow_html=True)
@@ -692,21 +1003,69 @@ with st.sidebar:
 # ------------------ HERO ------------------
 st.markdown("""
 <div class="hero-banner">
+    <div class="hero-banner-glow"></div>
     <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:12px;">
-        <div class="hero-eyebrow">🧬 Multimodal AI Diagnostic Platform</div>
+        <div class="hero-eyebrow">Multimodal AI Diagnostic Platform</div>
         <div class="scan-live"><span class="scan-live-dot"></span>SYSTEM ONLINE</div>
     </div>
     <h1 class="hero-title">Mpox<span> Health Checker</span></h1>
     <p class="hero-sub">
-        Upload a photo of the affected skin area and answer a few simple
-        questions. The system will help identify possible signs of Mpox
-        and provide guidance on the next steps.
+        Upload or capture a photo of the affected skin area and complete a short
+        clinical questionnaire. The system fuses deep learning image analysis with
+        symptom profiling to screen for Mpox and related conditions.
     </p>
     <div class="badge-row">
-        <span class="badge badge-teal"> Photo Analysis</span>
-        <span class="badge badge-blue"> Symptom Check</span>
-        <span class="badge badge-green">Health Guidance</span>
+        <span class="badge badge-teal">VGG16 CNN</span>
+        <span class="badge badge-blue">XGBoost Classifier</span>
+        <span class="badge badge-green">Decision-Level Fusion</span>
+        <span class="badge badge-purple">6-Class Detection</span>
     </div>
+</div>
+""", unsafe_allow_html=True)
+
+st.markdown("""
+<div class="banner-carousel">
+    <div class="banner-slide" style="background:rgba(0,200,180,0.07); border-color:#00C8B430;">
+        <span class="banner-icon">🧬</span>
+        <div class="banner-text">
+            <div class="banner-title">VGG16 Deep Learning Engine</div>
+            <div class="banner-sub">Pretrained on ImageNet · Fine-tuned on MSLD v2.0 · 537 clinical images · 6 classes</div>
+        </div>
+        <span class="banner-tag" style="background:#3B82F610;color:#3B82F6;border:1px solid #3B82F630;">CNN MODEL</span>
+    </div>
+    <div class="banner-slide" style="background:rgba(16,185,129,0.07); border-color:#10B98130;">
+        <span class="banner-icon">🛡️</span>
+        <div class="banner-text">
+            <div class="banner-title">Early Detection Saves Lives</div>
+            <div class="banner-sub">Mpox is treatable when caught early — this tool supports faster triage and clinical referral</div>
+        </div>
+        <span class="banner-tag" style="background:#10B98110;color:#10B981;border:1px solid #10B98130;">HEALTH TIP</span>
+    </div>
+    <div class="banner-slide" style="background:rgba(245,158,11,0.07); border-color:#F59E0B30;">
+        <span class="banner-icon">⚠️</span>
+        <div class="banner-text">
+            <div class="banner-title">For Best Results</div>
+            <div class="banner-sub">Use a clear, well-lit close-up photo of the affected skin area — avoid blurry or distant shots</div>
+        </div>
+        <span class="banner-tag" style="background:#F59E0B10;color:#F59E0B;border:1px solid #F59E0B30;">USAGE TIP</span>
+    </div>
+    <div class="banner-slide" style="background:rgba(139,92,246,0.07); border-color:#8B5CF630;">
+        <span class="banner-icon">📊</span>
+        <div class="banner-text">
+            <div class="banner-title">Multimodal Fusion Architecture</div>
+            <div class="banner-sub">Image CNN + XGBoost symptom classifier combined via decision-level fusion for higher accuracy</div>
+        </div>
+        <span class="banner-tag" style="background:#8B5CF610;color:#8B5CF6;border:1px solid #8B5CF630;">ARCHITECTURE</span>
+    </div>
+</div>
+""", unsafe_allow_html=True)
+
+st.markdown("""
+<div class="model-panel">
+    <div class="model-tag"><span class="dot" style="background:#00C8B4;"></span>VGG16 · ImageNet pretrained</div>
+    <div class="model-tag"><span class="dot" style="background:#3B82F6;"></span>XGBoost · 10 clinical features</div>
+    <div class="model-tag"><span class="dot" style="background:#10B981;"></span>Dataset · MSLD v2.0 · 537 images</div>
+    <div class="model-tag"><span class="dot" style="background:#F59E0B;"></span>Classes · 6 skin conditions</div>
 </div>
 """, unsafe_allow_html=True)
 
@@ -716,25 +1075,30 @@ st.markdown("""
 <div class="pipeline-row">
     <div class="pipeline-step">
         <div class="step-num">STEP 01</div>
-        <div class="step-name">Upload Image</div>
-        <div class="step-desc">Skin lesion photo</div>
+        <span class="step-icon">🖼️</span>
+        <div class="step-name">Provide Image</div>
+        <div class="step-desc">Upload or capture skin photo</div>
     </div>
     <div class="pipeline-step">
         <div class="step-num">STEP 02</div>
-        <div class="step-name">Photo Analysis</div>
-        <div class="step-desc">Analyze the Photo</div>
+        <span class="step-icon">🧠</span>
+        <div class="step-name">CNN Analysis</div>
+        <div class="step-desc">VGG16 classifies lesion</div>
     </div>
     <div class="pipeline-step">
         <div class="step-num">STEP 03</div>
+        <span class="step-icon">📋</span>
         <div class="step-name">Symptom Check</div>
-        <div class="step-desc">If Mpox suspected</div>
+        <div class="step-desc">XGBoost clinical screen</div>
     </div>
     <div class="pipeline-step">
         <div class="step-num">STEP 04</div>
-        <div class="step-name">Get Results</div>
-        <div class="step-desc">View Guidance</div>
+        <span class="step-icon">📊</span>
+        <div class="step-name">Fused Result</div>
+        <div class="step-desc">Decision-level fusion</div>
     </div>
 </div>
+
 <hr class="styled-divider">
 """, unsafe_allow_html=True)
 
@@ -825,11 +1189,21 @@ if image_file is not None:
     img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 
     # Generate a scan ID for this session/image — adds a "real record" feel
+    # Also store the SOURCE here, tied to the file_id, so it survives Streamlit
+    # reruns (the `image_file is camera_file` identity check breaks on reruns
+    # because Streamlit recreates widget objects each time the script runs).
     if "scan_id" not in st.session_state or st.session_state.get("last_file_id") != image_file.file_id:
         st.session_state["scan_id"] = "SCAN-" + "".join(random.choices(string.digits, k=6))
         st.session_state["last_file_id"] = image_file.file_id
+        # Determine source now, at the moment we first see this file_id,
+        # when widget identity checks are still valid.
+        st.session_state["source_label"] = (
+            "Camera Capture" if camera_file is not None and image_file.file_id == camera_file.file_id
+            else "File Upload"
+        )
+        st.session_state["saved_record_for"] = None  # reset save-guard for new image
 
-    source_label = "Camera Capture" if image_file is camera_file else "File Upload"
+    source_label = st.session_state["source_label"]
 
     col_img, col_gap = st.columns([1, 0.05])
     with col_img:
@@ -860,8 +1234,22 @@ if image_file is not None:
         """, unsafe_allow_html=True)
         st.stop()
 
-    # Preprocess & predict
-    img_resized = cv2.resize(img, (224, 224))
+    # ---------- PREPROCESS & PREDICT ----------
+    # For camera captures: apply CLAHE (Contrast Limited Adaptive Histogram
+    # Equalization) on the L-channel in LAB colour space to normalise uneven
+    # webcam lighting before feeding into the model. Uploaded files are already
+    # well-lit curated images so we skip this step for them to avoid altering
+    # images that are already close to training-set conditions.
+    img_for_model = img.copy()
+    if source_label == "Camera Capture":
+        lab        = cv2.cvtColor(img_for_model, cv2.COLOR_BGR2LAB)
+        l, a, b    = cv2.split(lab)
+        clahe      = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
+        l_eq       = clahe.apply(l)
+        lab_eq     = cv2.merge([l_eq, a, b])
+        img_for_model = cv2.cvtColor(lab_eq, cv2.COLOR_LAB2BGR)
+
+    img_resized = cv2.resize(img_for_model, (224, 224))
     img_array   = np.expand_dims(img_resized, axis=0)
     img_input   = tf.keras.applications.vgg16.preprocess_input(img_array)  # ✅ matches training
 
@@ -896,6 +1284,34 @@ if image_file is not None:
     fill_class   = "confidence-fill-danger" if is_mpox else "confidence-fill-safe"
     card_variant = "danger" if is_mpox else "safe"
 
+    # Build the per-class probability breakdown HTML.
+    # Colours: Monkeypox → red, Healthy → green, all others → amber.
+    CLASS_COLORS = {
+        "Monkeypox":  "#F87171",   # red
+        "Healthy":    "#34D399",   # green
+        "Chickenpox": "#FBBF24",   # amber
+        "Cowpox":     "#FBBF24",
+        "HFMD":       "#FBBF24",
+        "Measles":    "#FBBF24",
+    }
+    breakdown_rows = ""
+    for cls, prob in sorted(zip(classes, probs), key=lambda x: x[1], reverse=True):
+        pct   = prob * 100
+        color = CLASS_COLORS.get(cls, "#FBBF24")
+        bold  = "font-weight:700;" if cls == predicted_class else ""
+        breakdown_rows += f"""
+        <div style="margin-bottom:10px;">
+            <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+                <span style="font-size:12px; color:#CBD5E1; {bold}">{cls}</span>
+                <span style="font-family:'JetBrains Mono',monospace; font-size:12px;
+                             color:{color}; {bold}">{pct:.1f}%</span>
+            </div>
+            <div style="background:#1E3A5F; border-radius:4px; height:6px; overflow:hidden;">
+                <div style="width:{pct:.1f}%; height:100%; border-radius:4px;
+                            background:{color}; transition:width 0.5s ease;"></div>
+            </div>
+        </div>"""
+
     if not is_review:
         st.markdown(f"""
         <div class="result-card {card_variant}">
@@ -905,13 +1321,15 @@ if image_file is not None:
                     <p class="result-class {text_class}">{predicted_class if not is_inconclusive else "—"}</p>
                 </div>
                 <div style="text-align:right;">
-                    <div class="result-label">Result Reliability</div>
+                    <div class="result-label">Top Confidence</div>
                     <div class="confidence-text {bar_class}">{confidence*100:.1f}%</div>
                 </div>
             </div>
-            <div class="confidence-bar-bg">
+            <div class="confidence-bar-bg" style="margin-bottom:20px;">
                 <div class="confidence-bar-fill {fill_class}" style="width:{confidence*100:.1f}%"></div>
             </div>
+            <div class="result-label" style="margin-bottom:12px;">PROBABILITY BREAKDOWN — ALL CONDITIONS</div>
+            {breakdown_rows}
         </div>
         """, unsafe_allow_html=True)
 
@@ -1093,9 +1511,38 @@ if image_file is not None:
 
 # ------------------ FOOTER ------------------
 st.markdown("""
-<hr class="styled-divider">
-<div class="footer">
-    <p>Mpox Health Checker · Multimodal AI Diagnostic System · Makerere University</p>
-    <p style="margin-top:4px;">For research and academic evaluation only — not a substitute for clinical diagnosis</p>
+<div class="site-footer">
+    <div class="footer-grid">
+        <div class="footer-brand">
+            <div class="footer-logo">MpoxAI</div>
+            <p>A multimodal AI diagnostic platform combining VGG16 deep learning with XGBoost clinical symptom classification. Built for academic research at Makerere University.</p>
+        </div>
+        <div>
+            <div class="footer-col-title">Conditions Screened</div>
+            <span class="footer-link">🔴 Monkeypox (Mpox)</span>
+            <span class="footer-link">🟠 Chickenpox</span>
+            <span class="footer-link">🟡 Cowpox</span>
+            <span class="footer-link">🟢 HFMD</span>
+            <span class="footer-link">🔵 Measles</span>
+            <span class="footer-link">✅ Healthy Skin</span>
+        </div>
+        <div>
+            <div class="footer-col-title">Tech Stack</div>
+            <span class="footer-link">TensorFlow 2.18 · Keras</span>
+            <span class="footer-link">VGG16 · ImageNet</span>
+            <span class="footer-link">XGBoost Classifier</span>
+            <span class="footer-link">OpenCV · NumPy</span>
+            <span class="footer-link">Streamlit 1.56</span>
+            <span class="footer-link">MSLD v2.0 Dataset</span>
+        </div>
+    </div>
+    <div class="footer-bottom">
+        <p>© 2026 MpoxAI · Makerere University · For Research & Academic Evaluation Only</p>
+        <div class="footer-badge-row">
+            <span class="footer-badge">RESEARCH ONLY</span>
+            <span class="footer-badge">NOT CLINICAL ADVICE</span>
+            <span class="footer-badge">v1.0.0</span>
+        </div>
+    </div>
 </div>
 """, unsafe_allow_html=True)
