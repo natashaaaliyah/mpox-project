@@ -643,26 +643,33 @@ html, body, [data-testid="stAppViewContainer"] {
     background: linear-gradient(135deg, #16120A 0%, #1E1810 100%);
     border: 1.5px solid #FB923C40;
 }
-.final-card .verdict {
-    font-size: 28px;
-    font-weight: 800;
-    margin: 0 0 8px;
-    letter-spacing: -0.3px;
+/* ── 3D floating particles in hero ─────────────── */
+.particle {
+    position: absolute;
+    border-radius: 50%;
+    pointer-events: none;
+    animation: float-particle linear infinite;
+    opacity: 0;
 }
-.final-card .verdict.positive    { color: #F87171; }
-.final-card .verdict.negative    { color: var(--green); }
-.final-card .verdict.inconclusive{ color: var(--amber); }
-.final-card .verdict.rejected    { color: var(--purple); }
-.final-card .verdict.review      { color: #FB923C; }
-.final-card .verdict-sub {
-    font-size: 13px;
-    color: var(--text-secondary);
-    line-height: 1.6;
-    max-width: 480px;
-    margin: 0 auto;
+.particle:nth-child(1)  { width:4px;  height:4px;  background:var(--teal);   left:10%; animation-duration:8s;  animation-delay:0s;   }
+.particle:nth-child(2)  { width:3px;  height:3px;  background:var(--blue);   left:25%; animation-duration:10s; animation-delay:2s;   }
+.particle:nth-child(3)  { width:5px;  height:5px;  background:var(--purple); left:40%; animation-duration:7s;  animation-delay:1s;   }
+.particle:nth-child(4)  { width:3px;  height:3px;  background:var(--teal);   left:55%; animation-duration:9s;  animation-delay:3s;   }
+.particle:nth-child(5)  { width:4px;  height:4px;  background:var(--green);  left:70%; animation-duration:11s; animation-delay:0.5s; }
+.particle:nth-child(6)  { width:2px;  height:2px;  background:var(--blue);   left:85%; animation-duration:8s;  animation-delay:4s;   }
+@keyframes float-particle {
+    0%   { transform: translateY(120px) scale(0); opacity:0; }
+    10%  { opacity: 0.8; }
+    90%  { opacity: 0.4; }
+    100% { transform: translateY(-20px) scale(1.2); opacity:0; }
 }
 
-/* ── Pipeline steps ─────────────────────────────── */
+/* ── 3D perspective wrapper ─────────────────────── */
+.card-3d-wrapper {
+    perspective: 1000px;
+}
+
+/* ── Pipeline steps — 3D lift on hover ──────────── */
 .pipeline-row {
     display: flex;
     gap: 10px;
@@ -678,12 +685,35 @@ html, body, [data-testid="stAppViewContainer"] {
     padding: 16px 14px;
     text-align: center;
     position: relative;
-    transition: border-color 0.2s, box-shadow 0.2s;
+    transition: transform 0.35s cubic-bezier(0.34,1.56,0.64,1),
+                border-color 0.25s ease,
+                box-shadow 0.35s ease;
+    transform-style: preserve-3d;
+    cursor: default;
+    /* subtle base shadow for depth */
+    box-shadow: 0 4px 16px rgba(0,0,0,0.4),
+                0 1px 0 rgba(255,255,255,0.03) inset;
 }
 .pipeline-step:hover {
+    transform: translateY(-8px) rotateX(6deg);
     border-color: var(--teal);
-    box-shadow: 0 0 16px var(--teal-dim);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.5),
+                0 0 24px var(--teal-dim),
+                0 1px 0 rgba(255,255,255,0.05) inset;
 }
+/* shiny top edge on hover */
+.pipeline-step::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 10%; right: 10%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--teal), transparent);
+    border-radius: 50%;
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+.pipeline-step:hover::after { opacity: 1; }
+
 .pipeline-step .step-num {
     font-family: var(--font-mono);
     font-size: 9px;
@@ -695,6 +725,10 @@ html, body, [data-testid="stAppViewContainer"] {
     font-size: 20px;
     margin: 6px 0 4px;
     display: block;
+    transition: transform 0.35s cubic-bezier(0.34,1.56,0.64,1);
+}
+.pipeline-step:hover .step-icon {
+    transform: translateZ(20px) scale(1.18);
 }
 .pipeline-step .step-name {
     font-size: 12px;
@@ -707,7 +741,182 @@ html, body, [data-testid="stAppViewContainer"] {
     margin-top: 2px;
 }
 
-/* ── Model info panel ───────────────────────────── */
+/* ── Glassmorphism result card ───────────────────── */
+.result-card {
+    background: rgba(13,30,53,0.75);
+    backdrop-filter: blur(16px) saturate(140%);
+    -webkit-backdrop-filter: blur(16px) saturate(140%);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 20px;
+    padding: 28px 32px;
+    margin-top: 24px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4),
+                0 1px 0 rgba(255,255,255,0.06) inset;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.result-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 16px 48px rgba(0,0,0,0.5),
+                0 1px 0 rgba(255,255,255,0.08) inset;
+}
+/* shimmer sweep on result card */
+.result-card::after {
+    content: '';
+    position: absolute;
+    top: 0; left: -100%;
+    width: 60%;
+    height: 100%;
+    background: linear-gradient(105deg,
+        transparent 40%,
+        rgba(255,255,255,0.04) 50%,
+        transparent 60%);
+    animation: shimmer-sweep 4s ease-in-out infinite;
+    pointer-events: none;
+}
+@keyframes shimmer-sweep {
+    0%   { left: -100%; }
+    60%  { left: 160%;  }
+    100% { left: 160%;  }
+}
+.result-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    border-radius: 20px 20px 0 0;
+}
+.result-card.danger {
+    border-color: rgba(239,68,68,0.2);
+    background: rgba(18,8,8,0.80);
+    backdrop-filter: blur(16px);
+}
+.result-card.danger::before  { background: linear-gradient(90deg, var(--red), transparent); }
+.result-card.safe {
+    border-color: rgba(16,185,129,0.2);
+    background: rgba(8,24,18,0.80);
+    backdrop-filter: blur(16px);
+}
+.result-card.safe::before    { background: linear-gradient(90deg, var(--green), transparent); }
+
+/* ── Final verdict cards — 3D depth ─────────────── */
+.final-card {
+    border-radius: 20px;
+    padding: 36px 40px;
+    margin-top: 20px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    backdrop-filter: blur(20px) saturate(150%);
+    -webkit-backdrop-filter: blur(20px) saturate(150%);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.5),
+                0 1px 0 rgba(255,255,255,0.05) inset;
+    transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1),
+                box-shadow 0.4s ease;
+    animation: card-entrance 0.6s cubic-bezier(0.34,1.56,0.64,1) both;
+}
+.final-card:hover {
+    transform: translateY(-6px) scale(1.01);
+    box-shadow: 0 24px 60px rgba(0,0,0,0.6),
+                0 1px 0 rgba(255,255,255,0.08) inset;
+}
+@keyframes card-entrance {
+    0%   { opacity:0; transform: translateY(30px) scale(0.95); }
+    100% { opacity:1; transform: translateY(0)    scale(1);    }
+}
+/* orbiting glow orb on final card */
+.final-card::before {
+    content: '';
+    position: absolute;
+    width: 200px; height: 200px;
+    border-radius: 50%;
+    top: -60px; right: -60px;
+    pointer-events: none;
+    animation: orb-pulse 4s ease-in-out infinite;
+}
+.final-card::after {
+    content: '';
+    position: absolute;
+    bottom: -50px; left: -50px;
+    width: 150px; height: 150px;
+    border-radius: 50%;
+    pointer-events: none;
+    opacity: 0.06;
+}
+.final-card.positive  { background: rgba(20,8,8,0.85);  border: 1.5px solid rgba(248,113,113,0.25); }
+.final-card.positive::before  { background: radial-gradient(circle, rgba(239,68,68,0.15), transparent 70%); }
+.final-card.positive::after   { background: var(--red); }
+.final-card.negative  { background: rgba(7,24,18,0.85); border: 1.5px solid rgba(16,185,129,0.25); }
+.final-card.negative::before  { background: radial-gradient(circle, rgba(16,185,129,0.15), transparent 70%); }
+.final-card.negative::after   { background: var(--green); }
+.final-card.inconclusive { background: rgba(20,17,8,0.85);  border: 1.5px solid rgba(245,158,11,0.25); }
+.final-card.inconclusive::before { background: radial-gradient(circle, rgba(245,158,11,0.12), transparent 70%); }
+.final-card.rejected  { background: rgba(17,12,28,0.85); border: 1.5px solid rgba(139,92,246,0.25); }
+.final-card.rejected::before  { background: radial-gradient(circle, rgba(139,92,246,0.12), transparent 70%); }
+.final-card.review    { background: rgba(22,18,8,0.85);  border: 1.5px solid rgba(251,146,60,0.25); }
+.final-card.review::before    { background: radial-gradient(circle, rgba(251,146,60,0.12), transparent 70%); }
+@keyframes orb-pulse {
+    0%, 100% { transform: scale(1);   opacity: 0.8; }
+    50%       { transform: scale(1.2); opacity: 1.0; }
+}
+.final-card .verdict {
+    font-size: 28px;
+    font-weight: 800;
+    margin: 0 0 8px;
+    letter-spacing: -0.3px;
+    position: relative;
+    z-index: 1;
+}
+.final-card .verdict.positive    { color: #F87171; text-shadow: 0 0 30px rgba(239,68,68,0.4); }
+.final-card .verdict.negative    { color: var(--green); text-shadow: 0 0 30px rgba(16,185,129,0.4); }
+.final-card .verdict.inconclusive{ color: var(--amber); text-shadow: 0 0 30px rgba(245,158,11,0.4); }
+.final-card .verdict.rejected    { color: var(--purple); text-shadow: 0 0 30px rgba(139,92,246,0.4); }
+.final-card .verdict.review      { color: #FB923C; text-shadow: 0 0 30px rgba(251,146,60,0.4); }
+.final-card .verdict-sub {
+    font-size: 13px;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    max-width: 480px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 1;
+}
+
+/* ── Banner carousel — 3D slide entrance ────────── */
+.banner-carousel {
+    position: relative;
+    height: 56px;
+    overflow: hidden;
+    border-radius: 12px;
+    margin-bottom: 20px;
+    perspective: 800px;
+}
+.banner-slide {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    padding: 0 20px;
+    gap: 12px;
+    border-radius: 12px;
+    opacity: 0;
+    animation: banner-cycle-3d 20s infinite;
+    border: 1px solid var(--border);
+    backdrop-filter: blur(10px);
+}
+.banner-slide:nth-child(1) { animation-delay: 0s;   }
+.banner-slide:nth-child(2) { animation-delay: 5s;   }
+.banner-slide:nth-child(3) { animation-delay: 10s;  }
+.banner-slide:nth-child(4) { animation-delay: 15s;  }
+@keyframes banner-cycle-3d {
+    0%        { opacity:0; transform: rotateX(-25deg) translateY(10px); }
+    4%, 22%   { opacity:1; transform: rotateX(0deg)   translateY(0);   }
+    25%, 100% { opacity:0; transform: rotateX(25deg)  translateY(-10px);}
+}
+
+/* ── Model panel tags — 3D chip hover ───────────── */
 .model-panel {
     display: flex;
     gap: 10px;
@@ -726,14 +935,96 @@ html, body, [data-testid="stAppViewContainer"] {
     display: flex;
     align-items: center;
     gap: 6px;
+    transition: transform 0.25s cubic-bezier(0.34,1.56,0.64,1),
+                box-shadow 0.25s ease,
+                border-color 0.25s ease;
+    cursor: default;
+}
+.model-tag:hover {
+    transform: translateY(-3px) scale(1.04);
+    border-color: var(--teal);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.3), 0 0 12px var(--teal-dim);
+    color: var(--text-primary) !important;
 }
 .model-tag .dot {
     width: 6px; height: 6px;
     border-radius: 50%;
     display: inline-block;
+    transition: transform 0.25s ease;
+}
+.model-tag:hover .dot { transform: scale(1.5); }
+
+/* ── Scan meta bar — glass + depth ──────────────── */
+.scan-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    background: rgba(10,22,40,0.7);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 12px;
+    padding: 12px 20px;
+    margin-top: 16px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-secondary);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.3);
 }
 
-/* ── Rotating info banner ───────────────────────── */
+/* ── Hero banner — deeper 3D perspective ────────── */
+.hero-banner {
+    background: linear-gradient(135deg, #071428 0%, #0A1E3A 40%, #050D1E 100%);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 40px 44px 32px;
+    margin-bottom: 12px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.6),
+                0 0 0 1px rgba(255,255,255,0.03) inset,
+                0 1px 0 rgba(0,200,180,0.1) inset;
+    transform-style: preserve-3d;
+}
+
+/* ── Buttons — 3D press effect ───────────────────── */
+[data-testid="stButton"] > button {
+    background: linear-gradient(135deg, var(--teal) 0%, #0891B2 100%) !important;
+    color: #050A14 !important;
+    font-weight: 700 !important;
+    font-size: 13px !important;
+    letter-spacing: 1px !important;
+    text-transform: uppercase !important;
+    border: none !important;
+    border-radius: 10px !important;
+    padding: 14px 32px !important;
+    width: 100% !important;
+    margin-top: 12px !important;
+    transition: all 0.15s ease !important;
+    box-shadow: 0 6px 0 #006a5e,
+                0 8px 20px rgba(0,200,180,0.30) !important;
+}
+[data-testid="stButton"] > button:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 8px 0 #006a5e,
+                0 12px 28px rgba(0,200,180,0.40) !important;
+}
+[data-testid="stButton"] > button:active {
+    transform: translateY(4px) !important;
+    box-shadow: 0 2px 0 #006a5e,
+                0 4px 12px rgba(0,200,180,0.20) !important;
+}
+
+/* ── History table — glass card ─────────────────── */
+[data-testid="stDataFrame"] {
+    border-radius: 12px !important;
+    overflow: hidden !important;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.3) !important;
+}
+
+
 .banner-carousel {
     position: relative;
     height: 56px;
@@ -989,10 +1280,9 @@ with st.sidebar:
 
     <div class="sidebar-section">About</div>
     <p class="sidebar-p">
-        Mpox Health Checker fuses CNN-based image classification with a clinical
-        symptom questionnaire to support differential diagnosis of
-        Mpox against visually similar conditions (Chickenpox, Cowpox,
-        HFMD, Measles).
+        Mpox Health Checker uses advanced AI to analyse skin photos and
+        clinical symptoms, helping you identify possible signs of Mpox
+        and related skin conditions quickly and easily.
     </p>
     <div class="sidebar-disclaimer">
         Your Health, Our Priority!!!.
@@ -1004,8 +1294,14 @@ with st.sidebar:
 st.markdown("""
 <div class="hero-banner">
     <div class="hero-banner-glow"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
     <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:12px;">
-        <div class="hero-eyebrow">Multimodal AI Diagnostic Platform</div>
+        <div class="hero-eyebrow">AI-Powered Skin Disease Screening</div>
         <div class="scan-live"><span class="scan-live-dot"></span>SYSTEM ONLINE</div>
     </div>
     <h1 class="hero-title">Mpox<span> Health Checker</span></h1>
@@ -1014,11 +1310,16 @@ st.markdown("""
         clinical questionnaire. The system fuses deep learning image analysis with
         symptom profiling to screen for Mpox and related conditions.
     </p>
+    <div style="margin-top:16px; display:flex; align-items:center; gap:10px;">
+        <div style="height:1px; width:28px; background:var(--teal); opacity:0.6;"></div>
+        <span style="font-family:var(--font-mono); font-size:11px; letter-spacing:2.5px; color:var(--teal); text-transform:uppercase; opacity:0.9;">Your Health, Our Priority</span>
+        <div style="height:1px; width:28px; background:var(--teal); opacity:0.6;"></div>
+    </div>
     <div class="badge-row">
-        <span class="badge badge-teal">VGG16 CNN</span>
-        <span class="badge badge-blue">XGBoost Classifier</span>
-        <span class="badge badge-green">Decision-Level Fusion</span>
-        <span class="badge badge-purple">6-Class Detection</span>
+        <span class="badge badge-teal">Photo Analysis</span>
+        <span class="badge badge-blue">Symptom Check</span>
+        <span class="badge badge-green">Instant Results</span>
+        <span class="badge badge-purple">6 Conditions</span>
     </div>
 </div>
 """, unsafe_allow_html=True)
@@ -1028,21 +1329,21 @@ st.markdown("""
     <div class="banner-slide" style="background:rgba(0,200,180,0.07); border-color:#00C8B430;">
         <span class="banner-icon">🧬</span>
         <div class="banner-text">
-            <div class="banner-title">VGG16 Deep Learning Engine</div>
-            <div class="banner-sub">Pretrained on ImageNet · Fine-tuned on MSLD v2.0 · 537 clinical images · 6 classes</div>
+            <div class="banner-title">AI-Powered Skin Analysis</div>
+            <div class="banner-sub">Our system analyses your photo to detect signs of Mpox and 5 other similar skin conditions</div>
         </div>
-        <span class="banner-tag" style="background:#3B82F610;color:#3B82F6;border:1px solid #3B82F630;">CNN MODEL</span>
+        <span class="banner-tag" style="background:#3B82F610;color:#3B82F6;border:1px solid #3B82F630;">PHOTO SCAN</span>
     </div>
     <div class="banner-slide" style="background:rgba(16,185,129,0.07); border-color:#10B98130;">
         <span class="banner-icon">🛡️</span>
         <div class="banner-text">
             <div class="banner-title">Early Detection Saves Lives</div>
-            <div class="banner-sub">Mpox is treatable when caught early — this tool supports faster triage and clinical referral</div>
+            <div class="banner-sub">Mpox is treatable when caught early — this tool helps you know when to seek medical care</div>
         </div>
         <span class="banner-tag" style="background:#10B98110;color:#10B981;border:1px solid #10B98130;">HEALTH TIP</span>
     </div>
     <div class="banner-slide" style="background:rgba(245,158,11,0.07); border-color:#F59E0B30;">
-        <span class="banner-icon">⚠️</span>
+        <span class="banner-icon">📸</span>
         <div class="banner-text">
             <div class="banner-title">For Best Results</div>
             <div class="banner-sub">Use a clear, well-lit close-up photo of the affected skin area — avoid blurry or distant shots</div>
@@ -1050,22 +1351,22 @@ st.markdown("""
         <span class="banner-tag" style="background:#F59E0B10;color:#F59E0B;border:1px solid #F59E0B30;">USAGE TIP</span>
     </div>
     <div class="banner-slide" style="background:rgba(139,92,246,0.07); border-color:#8B5CF630;">
-        <span class="banner-icon">📊</span>
+        <span class="banner-icon">✅</span>
         <div class="banner-text">
-            <div class="banner-title">Multimodal Fusion Architecture</div>
-            <div class="banner-sub">Image CNN + XGBoost symptom classifier combined via decision-level fusion for higher accuracy</div>
+            <div class="banner-title">Two-Step Screening Process</div>
+            <div class="banner-sub">First we analyse your photo, then ask about your symptoms — for a more complete and accurate result</div>
         </div>
-        <span class="banner-tag" style="background:#8B5CF610;color:#8B5CF6;border:1px solid #8B5CF630;">ARCHITECTURE</span>
+        <span class="banner-tag" style="background:#8B5CF610;color:#8B5CF6;border:1px solid #8B5CF630;">HOW IT WORKS</span>
     </div>
 </div>
 """, unsafe_allow_html=True)
 
 st.markdown("""
 <div class="model-panel">
-    <div class="model-tag"><span class="dot" style="background:#00C8B4;"></span>VGG16 · ImageNet pretrained</div>
-    <div class="model-tag"><span class="dot" style="background:#3B82F6;"></span>XGBoost · 10 clinical features</div>
-    <div class="model-tag"><span class="dot" style="background:#10B981;"></span>Dataset · MSLD v2.0 · 537 images</div>
-    <div class="model-tag"><span class="dot" style="background:#F59E0B;"></span>Classes · 6 skin conditions</div>
+    <div class="model-tag"><span class="dot" style="background:#00C8B4;"></span>AI Photo Analysis</div>
+    <div class="model-tag"><span class="dot" style="background:#3B82F6;"></span>Symptom Questionnaire</div>
+    <div class="model-tag"><span class="dot" style="background:#10B981;"></span>6 Skin Conditions Screened</div>
+    <div class="model-tag"><span class="dot" style="background:#F59E0B;"></span>Instant Results</div>
 </div>
 """, unsafe_allow_html=True)
 
@@ -1076,26 +1377,26 @@ st.markdown("""
     <div class="pipeline-step">
         <div class="step-num">STEP 01</div>
         <span class="step-icon">🖼️</span>
-        <div class="step-name">Provide Image</div>
-        <div class="step-desc">Upload or capture skin photo</div>
+        <div class="step-name">Provide Photo</div>
+        <div class="step-desc">Upload or take a photo</div>
     </div>
     <div class="pipeline-step">
         <div class="step-num">STEP 02</div>
-        <span class="step-icon">🧠</span>
-        <div class="step-name">CNN Analysis</div>
-        <div class="step-desc">VGG16 classifies lesion</div>
+        <span class="step-icon">🔍</span>
+        <div class="step-name">Photo Analysis</div>
+        <div class="step-desc">AI scans the image</div>
     </div>
     <div class="pipeline-step">
         <div class="step-num">STEP 03</div>
         <span class="step-icon">📋</span>
         <div class="step-name">Symptom Check</div>
-        <div class="step-desc">XGBoost clinical screen</div>
+        <div class="step-desc">Answer a few questions</div>
     </div>
     <div class="pipeline-step">
         <div class="step-num">STEP 04</div>
-        <span class="step-icon">📊</span>
-        <div class="step-name">Fused Result</div>
-        <div class="step-desc">Decision-level fusion</div>
+        <span class="step-icon">✅</span>
+        <div class="step-name">Get Your Result</div>
+        <div class="step-desc">Clear health guidance</div>
     </div>
 </div>
 
@@ -1253,7 +1554,7 @@ if image_file is not None:
     img_array   = np.expand_dims(img_resized, axis=0)
     img_input   = tf.keras.applications.vgg16.preprocess_input(img_array)  # ✅ matches training
 
-    with st.spinner("Running CNN analysis…"):
+    with st.spinner("Analysing your photo…"):
         prediction = vgg_model.predict(img_input)
         probs      = prediction[0]
 
@@ -1446,7 +1747,7 @@ if image_file is not None:
                 1 if swollen_lymph   == "Yes" else 0,
             ]])
 
-            with st.spinner("Running XGBoost symptom analysis…"):
+            with st.spinner("Checking your symptoms…"):
                 final_prediction = xgb_model.predict(features)
 
             result_label = str(final_prediction[0])
@@ -1515,7 +1816,7 @@ st.markdown("""
     <div class="footer-grid">
         <div class="footer-brand">
             <div class="footer-logo">MpoxAI</div>
-            <p>A multimodal AI diagnostic platform combining VGG16 deep learning with XGBoost clinical symptom classification. Built for academic research at Makerere University.</p>
+            <p>An AI-powered health screening tool that analyses skin photos and clinical symptoms to help detect Mpox and related conditions early. Built for academic research at Makerere University.</p>
         </div>
         <div>
             <div class="footer-col-title">Conditions Screened</div>
@@ -1527,13 +1828,13 @@ st.markdown("""
             <span class="footer-link">✅ Healthy Skin</span>
         </div>
         <div>
-            <div class="footer-col-title">Tech Stack</div>
-            <span class="footer-link">TensorFlow 2.18 · Keras</span>
-            <span class="footer-link">VGG16 · ImageNet</span>
-            <span class="footer-link">XGBoost Classifier</span>
-            <span class="footer-link">OpenCV · NumPy</span>
-            <span class="footer-link">Streamlit 1.56</span>
-            <span class="footer-link">MSLD v2.0 Dataset</span>
+            <div class="footer-col-title">How It Works</div>
+            <span class="footer-link">📸 Photo-based skin screening</span>
+            <span class="footer-link">📋 Clinical symptom questions</span>
+            <span class="footer-link">⚡ Instant AI analysis</span>
+            <span class="footer-link">📊 Probability breakdown</span>
+            <span class="footer-link">🗂️ Diagnosis history log</span>
+            <span class="footer-link">📥 Downloadable records</span>
         </div>
     </div>
     <div class="footer-bottom">
