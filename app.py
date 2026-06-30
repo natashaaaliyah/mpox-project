@@ -313,12 +313,7 @@ html, body, [data-testid="stAppViewContainer"] {
     align-items: center;
     gap: 8px;
 }
-.hero-eyebrow::before {
-    content: '';
-    width: 20px; height: 1px;
-    background: var(--teal);
-    display: inline-block;
-}
+
 .hero-title {
     font-size: 38px;
     font-weight: 800;
@@ -1085,7 +1080,7 @@ html, body, [data-testid="stAppViewContainer"] {
 }
 .footer-grid {
     display: grid;
-    grid-template-columns: 2fr 1fr 1fr;
+    grid-template-columns: 1fr;
     gap: 32px;
     margin-bottom: 28px;
 }
@@ -1814,10 +1809,6 @@ if image_file is not None:
 st.markdown("""
 <div class="site-footer">
     <div class="footer-grid">
-        <div class="footer-brand">
-            <div class="footer-logo">MpoxAI</div>
-            <p>An AI-powered health screening tool that analyses skin photos and clinical symptoms to help detect Mpox and related conditions early. Built for academic research at Makerere University.</p>
-        </div>
         <div>
             <div class="footer-col-title">Conditions Screened</div>
             <span class="footer-link">🔴 Monkeypox (Mpox)</span>
@@ -1827,22 +1818,13 @@ st.markdown("""
             <span class="footer-link">🔵 Measles</span>
             <span class="footer-link">✅ Healthy Skin</span>
         </div>
-        <div>
-            <div class="footer-col-title">How It Works</div>
-            <span class="footer-link">📸 Photo-based skin screening</span>
-            <span class="footer-link">📋 Clinical symptom questions</span>
-            <span class="footer-link">⚡ Instant AI analysis</span>
-            <span class="footer-link">📊 Probability breakdown</span>
-            <span class="footer-link">🗂️ Diagnosis history log</span>
-            <span class="footer-link">📥 Downloadable records</span>
-        </div>
     </div>
     <div class="footer-bottom">
         <p>© 2026 MpoxAI · Makerere University · For Research & Academic Evaluation Only</p>
         <div class="footer-badge-row">
-            <span class="footer-badge">RESEARCH ONLY</span>
-            <span class="footer-badge">NOT CLINICAL ADVICE</span>
-            <span class="footer-badge">v1.0.0</span>
+            <span class="footer-badge">GET YOUR HEALTH IN CHECK TODAY</span>
+            <span class="footer-badge">YOUR HEALTH MATTERS</span>
+            <span class="footer-badge">All Rights Reserved</span>
         </div>
     </div>
 </div>
