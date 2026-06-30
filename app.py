@@ -1563,7 +1563,8 @@ if image_file is not None:
         mpox_idx  = classes.index("Monkeypox")
         mpox_prob = float(probs[mpox_idx])
 
-    is_mpox         = (predicted_class == "Monkeypox") or (mpox_prob >= 0.35)
+    mpox_safety_threshold = 0.60 if source_label == "Camera Capture" else 0.35
+    is_mpox = (predicted_class == "Monkeypox" and confidence >= mpox_safety_threshold) or (mpox_prob >= mpox_safety_threshold)
     is_inconclusive = confidence < CONFIDENCE_THRESHOLD
 
     # Borderline skin coverage + suspiciously high confidence = likely
@@ -1608,7 +1609,7 @@ if image_file is not None:
             </div>
         </div>"""
 
-    if not is_review:
+    if not is_review and not is_inconclusive:
         st.markdown(f"""
         <div class="result-card {card_variant}">
             <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:16px;">
@@ -1633,12 +1634,9 @@ if image_file is not None:
     if is_review:
         st.markdown(f"""
         <div class="final-card review">
-            <div class="verdict review">🔎 Unusual Result — Review Recommended</div>
+            <div class="verdict review"> Unusual Result — Review Recommended</div>
             <div class="verdict-sub">
-                Only {skin_ratio*100:.1f}% of this image is skin-toned —
-                lower than expected for a typical lesion close-up.
-                This pattern often indicates a non-skin image (e.g. another type of medical scan,
-                or an object with skin-like colors). Please verify this is a clear photo of a
+                Please verify this is a clear photo of a
                 skin lesion, or upload a different image.
             </div>
         </div>
@@ -1659,7 +1657,7 @@ if image_file is not None:
         <div class="final-card inconclusive">
             <div class="verdict inconclusive">⚠ Unable to Determine</div>
             <div class="verdict-sub">
-                Model confidence is {confidence*100:.1f}%, below the required threshold of {CONFIDENCE_THRESHOLD*100:.0f}%.
+                Model confidence is {confidence*100:.1f}%, below the required threshold.
                 The uploaded image may not be a valid skin lesion, or the quality is insufficient for reliable diagnosis.
                 Please upload a clear, close-up photo of the affected skin area.
             </div>
